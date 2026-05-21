@@ -1,0 +1,1372 @@
+[
+  {
+    "folder": "02182026",
+    "video": "cainhcg1.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.2952,
+      "U0_mm_per_s": 1056.82,
+      "contact_time_ms": 4.338,
+      "max_spread_width_mm": 2.6057,
+      "beta_max": 2.0118
+    },
+    "dimensionless": {
+      "We": 45.115,
+      "Re": 1352.5,
+      "Oh": 0.004966,
+      "Ca": 0.033356,
+      "Fr": 9.376,
+      "beta_splash": 0.0904,
+      "tau_c_ms": 2.9104,
+      "tau_ic_ms": 1.2256,
+      "t_star": 1.49,
+      "beta_max": 2.0118
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhcg2.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 2.0419,
+      "U0_mm_per_s": 836.57,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 3.5352,
+      "beta_max": 1.7313
+    },
+    "dimensionless": {
+      "We": 44.568,
+      "Re": 1687.9,
+      "Oh": 0.003955,
+      "Ca": 0.026404,
+      "Fr": 5.911,
+      "beta_splash": 0.0803,
+      "tau_c_ms": 5.761,
+      "tau_ic_ms": 2.4408,
+      "t_star": 0.58,
+      "beta_max": 1.7313
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhcg3.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 19.4895,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhcg4.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.7524,
+      "U0_mm_per_s": 1002.02,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 3.459,
+      "beta_max": 1.9739
+    },
+    "dimensionless": {
+      "We": 54.874,
+      "Re": 1735.1,
+      "Oh": 0.004269,
+      "Ca": 0.031626,
+      "Fr": 7.642,
+      "beta_splash": 0.0909,
+      "tau_c_ms": 4.5803,
+      "tau_ic_ms": 1.7489,
+      "t_star": 0.73,
+      "beta_max": 1.9739
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhcg5.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 19.4895,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhsds1.mp4",
+    "fluid_type": "sds_above_cmc",
+    "fluid_label": "CA + SDS above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.037,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 999.0
+    },
+    "raw": {
+      "D0_mm": 2.621,
+      "U0_mm_per_s": 564.65,
+      "contact_time_ms": 4.0043,
+      "max_spread_width_mm": 0.6857,
+      "beta_max": 0.2616
+    },
+    "dimensionless": {
+      "We": 22.563,
+      "Re": 1478.5,
+      "Oh": 0.003213,
+      "Ca": 0.015261,
+      "Fr": 3.521,
+      "beta_splash": 0.0575,
+      "tau_c_ms": 7.7954,
+      "tau_ic_ms": 4.6418,
+      "t_star": 0.51,
+      "beta_max": 0.2616
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhsds2.mp4",
+    "fluid_type": "sds_above_cmc",
+    "fluid_label": "CA + SDS above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.037,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 999.0
+    },
+    "raw": {
+      "D0_mm": 2.9105,
+      "U0_mm_per_s": 1129.88,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 4.2667,
+      "beta_max": 1.466
+    },
+    "dimensionless": {
+      "We": 100.322,
+      "Re": 3285.2,
+      "Oh": 0.003049,
+      "Ca": 0.030537,
+      "Fr": 6.687,
+      "beta_splash": 0.1042,
+      "tau_c_ms": 9.122,
+      "tau_ic_ms": 2.5759,
+      "t_star": 0.37,
+      "beta_max": 1.466
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhsds3.mp4",
+    "fluid_type": "sds_above_cmc",
+    "fluid_label": "CA + SDS above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.037,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 999.0
+    },
+    "raw": {
+      "D0_mm": 1.9505,
+      "U0_mm_per_s": 1064.65,
+      "contact_time_ms": 3.6706,
+      "max_spread_width_mm": 4.3124,
+      "beta_max": 2.2109
+    },
+    "dimensionless": {
+      "We": 59.693,
+      "Re": 2074.5,
+      "Oh": 0.003724,
+      "Ca": 0.028774,
+      "Fr": 7.697,
+      "beta_splash": 0.0928,
+      "tau_c_ms": 5.0044,
+      "tau_ic_ms": 1.8321,
+      "t_star": 0.73,
+      "beta_max": 2.2109
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhtx1.mp4",
+    "fluid_type": "tx_above_cmc",
+    "fluid_label": "CA + TX-100 above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.03,
+      "eta_Pa_s": 0.00102,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.3562,
+      "U0_mm_per_s": 1054.21,
+      "contact_time_ms": 5.3391,
+      "max_spread_width_mm": 3.0781,
+      "beta_max": 2.2697
+    },
+    "dimensionless": {
+      "We": 50.14,
+      "Re": 1398.9,
+      "Oh": 0.005062,
+      "Ca": 0.035843,
+      "Fr": 9.14,
+      "beta_splash": 0.0929,
+      "tau_c_ms": 3.2207,
+      "tau_ic_ms": 1.2865,
+      "t_star": 1.66,
+      "beta_max": 2.2697
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhtx2.mp4",
+    "fluid_type": "tx_above_cmc",
+    "fluid_label": "CA + TX-100 above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.03,
+      "eta_Pa_s": 0.00102,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.3562,
+      "U0_mm_per_s": 1114.23,
+      "contact_time_ms": 4.6717,
+      "max_spread_width_mm": 2.8648,
+      "beta_max": 2.1124
+    },
+    "dimensionless": {
+      "We": 56.012,
+      "Re": 1478.5,
+      "Oh": 0.005062,
+      "Ca": 0.037884,
+      "Fr": 9.66,
+      "beta_splash": 0.0973,
+      "tau_c_ms": 3.2207,
+      "tau_ic_ms": 1.2172,
+      "t_star": 1.45,
+      "beta_max": 2.1124
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainhtx3.mp4",
+    "fluid_type": "tx_above_cmc",
+    "fluid_label": "CA + TX-100 above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.03,
+      "eta_Pa_s": 0.00102,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 0.8229,
+      "U0_mm_per_s": 1103.79,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 6.9638,
+      "beta_max": 8.463
+    },
+    "dimensionless": {
+      "We": 33.353,
+      "Re": 888.7,
+      "Oh": 0.006498,
+      "Ca": 0.037529,
+      "Fr": 12.285,
+      "beta_splash": 0.0888,
+      "tau_c_ms": 1.5222,
+      "tau_ic_ms": 0.7455,
+      "t_star": 2.19,
+      "beta_max": 8.463
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainlcg1.mp4",
+    "fluid_type": "cg_below_cmc",
+    "fluid_label": "CA + CG/CAPB below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.052,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.3105,
+      "U0_mm_per_s": 1095.96,
+      "contact_time_ms": 9.6771,
+      "max_spread_width_mm": 4.6171,
+      "beta_max": 3.5233
+    },
+    "dimensionless": {
+      "We": 30.21,
+      "Re": 1419.2,
+      "Oh": 0.003873,
+      "Ca": 0.021287,
+      "Fr": 9.666,
+      "beta_splash": 0.0794,
+      "tau_c_ms": 2.3237,
+      "tau_ic_ms": 1.1958,
+      "t_star": 4.16,
+      "beta_max": 3.5233
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainlcg2.mp4",
+    "fluid_type": "cg_below_cmc",
+    "fluid_label": "CA + CG/CAPB below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.052,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.4933,
+      "U0_mm_per_s": 1046.38,
+      "contact_time_ms": 4.6717,
+      "max_spread_width_mm": 3.2152,
+      "beta_max": 2.1531
+    },
+    "dimensionless": {
+      "We": 31.38,
+      "Re": 1544.0,
+      "Oh": 0.003628,
+      "Ca": 0.020324,
+      "Fr": 8.645,
+      "beta_splash": 0.0781,
+      "tau_c_ms": 2.8264,
+      "tau_ic_ms": 1.4271,
+      "t_star": 1.65,
+      "beta_max": 2.1531
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainlcg3.mp4",
+    "fluid_type": "cg_below_cmc",
+    "fluid_label": "CA + CG/CAPB below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.052,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.7067,
+      "U0_mm_per_s": 1116.84,
+      "contact_time_ms": 5.0054,
+      "max_spread_width_mm": 3.4895,
+      "beta_max": 2.0446
+    },
+    "dimensionless": {
+      "We": 40.857,
+      "Re": 1883.5,
+      "Oh": 0.003394,
+      "Ca": 0.021692,
+      "Fr": 8.631,
+      "beta_splash": 0.0843,
+      "tau_c_ms": 3.4535,
+      "tau_ic_ms": 1.5282,
+      "t_star": 1.45,
+      "beta_max": 2.0446
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainlsds1.mp4",
+    "fluid_type": "sds_below_cmc",
+    "fluid_label": "CA + SDS below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.058,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 4.1448,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "02182026",
+    "video": "cainlsds2.mp4",
+    "fluid_type": "sds_below_cmc",
+    "fluid_label": "CA + SDS below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.058,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.6457,
+      "U0_mm_per_s": 1093.35,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 3.7486,
+      "beta_max": 2.2778
+    },
+    "dimensionless": {
+      "We": 33.851,
+      "Re": 1795.7,
+      "Oh": 0.00324,
+      "Ca": 0.018851,
+      "Fr": 8.605,
+      "beta_splash": 0.0794,
+      "tau_c_ms": 3.0962,
+      "tau_ic_ms": 1.5052,
+      "t_star": 1.08,
+      "beta_max": 2.2778
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainlsds3.mp4",
+    "fluid_type": "sds_below_cmc",
+    "fluid_label": "CA + SDS below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.058,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.4171,
+      "U0_mm_per_s": 1169.02,
+      "contact_time_ms": 4.0043,
+      "max_spread_width_mm": 3.4895,
+      "beta_max": 2.4624
+    },
+    "dimensionless": {
+      "We": 33.323,
+      "Re": 1653.3,
+      "Oh": 0.003492,
+      "Ca": 0.020156,
+      "Fr": 9.915,
+      "beta_splash": 0.0819,
+      "tau_c_ms": 2.474,
+      "tau_ic_ms": 1.2122,
+      "t_star": 1.62,
+      "beta_max": 2.4624
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainltx1.mp4",
+    "fluid_type": "tx_below_cmc",
+    "fluid_label": "CA + TX-100 below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.05,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.28,
+      "U0_mm_per_s": 1056.82,
+      "contact_time_ms": 4.338,
+      "max_spread_width_mm": 2.3619,
+      "beta_max": 1.8452
+    },
+    "dimensionless": {
+      "We": 28.535,
+      "Re": 1336.7,
+      "Oh": 0.003996,
+      "Ca": 0.021348,
+      "Fr": 9.431,
+      "beta_splash": 0.0777,
+      "tau_c_ms": 2.2874,
+      "tau_ic_ms": 1.2112,
+      "t_star": 1.9,
+      "beta_max": 1.8452
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainltx2.mp4",
+    "fluid_type": "tx_below_cmc",
+    "fluid_label": "CA + TX-100 below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.05,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.8133,
+      "U0_mm_per_s": 1054.21,
+      "contact_time_ms": 4.338,
+      "max_spread_width_mm": 4.2057,
+      "beta_max": 2.3193
+    },
+    "dimensionless": {
+      "We": 40.224,
+      "Re": 1888.9,
+      "Oh": 0.003358,
+      "Ca": 0.021295,
+      "Fr": 7.904,
+      "beta_splash": 0.0822,
+      "tau_c_ms": 3.8569,
+      "tau_ic_ms": 1.7201,
+      "t_star": 1.12,
+      "beta_max": 2.3193
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "cainltx3.mp4",
+    "fluid_type": "tx_below_cmc",
+    "fluid_label": "CA + TX-100 below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.05,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.5238,
+      "U0_mm_per_s": 1069.87,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 2.819,
+      "beta_max": 1.85
+    },
+    "dimensionless": {
+      "We": 34.814,
+      "Re": 1610.9,
+      "Oh": 0.003663,
+      "Ca": 0.021611,
+      "Fr": 8.75,
+      "beta_splash": 0.0809,
+      "tau_c_ms": 2.9712,
+      "tau_ic_ms": 1.4243,
+      "t_star": 1.12,
+      "beta_max": 1.85
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "caonly1.mp4",
+    "fluid_type": "ca_only",
+    "fluid_label": "CA nanoparticles in water (additive-free)",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 2.5295,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "02182026",
+    "video": "caonly2.mp4",
+    "fluid_type": "ca_only",
+    "fluid_label": "CA nanoparticles in water (additive-free)",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": 1.8286,
+      "U0_mm_per_s": 1048.99,
+      "contact_time_ms": 4.6717,
+      "max_spread_width_mm": 3.8857,
+      "beta_max": 2.125
+    },
+    "dimensionless": {
+      "We": 27.709,
+      "Re": 1912.4,
+      "Oh": 0.002752,
+      "Ca": 0.014489,
+      "Fr": 7.832,
+      "beta_splash": 0.0725,
+      "tau_c_ms": 3.2442,
+      "tau_ic_ms": 1.7432,
+      "t_star": 1.44,
+      "beta_max": 2.125
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "caonly3.mp4",
+    "fluid_type": "ca_only",
+    "fluid_label": "CA nanoparticles in water (additive-free)",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": 1.661,
+      "U0_mm_per_s": 1041.16,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 3.5657,
+      "beta_max": 2.1468
+    },
+    "dimensionless": {
+      "We": 24.795,
+      "Re": 1724.2,
+      "Oh": 0.002888,
+      "Ca": 0.014381,
+      "Fr": 8.156,
+      "beta_splash": 0.0709,
+      "tau_c_ms": 2.8086,
+      "tau_ic_ms": 1.5953,
+      "t_star": 1.19,
+      "beta_max": 2.1468
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "tx.mp4",
+    "fluid_type": "tx_only",
+    "fluid_label": "TX-100 only above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.03,
+      "eta_Pa_s": 0.00102,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.8286,
+      "U0_mm_per_s": 1202.95,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 3.7486,
+      "beta_max": 2.05
+    },
+    "dimensionless": {
+      "We": 88.028,
+      "Re": 2152.3,
+      "Oh": 0.004359,
+      "Ca": 0.0409,
+      "Fr": 8.982,
+      "beta_splash": 0.109,
+      "tau_c_ms": 5.0424,
+      "tau_ic_ms": 1.5201,
+      "t_star": 0.66,
+      "beta_max": 2.05
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "water.mp4",
+    "fluid_type": "water",
+    "fluid_label": "Pure water",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": 2.2552,
+      "U0_mm_per_s": 1273.4,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 3.9314,
+      "beta_max": 1.7432
+    },
+    "dimensionless": {
+      "We": 50.358,
+      "Re": 2863.2,
+      "Oh": 0.002479,
+      "Ca": 0.017588,
+      "Fr": 8.561,
+      "beta_splash": 0.0882,
+      "tau_c_ms": 4.4434,
+      "tau_ic_ms": 1.771,
+      "t_star": 0.75,
+      "beta_max": 1.7432
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "water2.mp4",
+    "fluid_type": "water",
+    "fluid_label": "Pure water",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": 2.24,
+      "U0_mm_per_s": 1223.82,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 3.9162,
+      "beta_max": 1.7483
+    },
+    "dimensionless": {
+      "We": 46.2,
+      "Re": 2733.1,
+      "Oh": 0.002487,
+      "Ca": 0.016904,
+      "Fr": 8.256,
+      "beta_splash": 0.0852,
+      "tau_c_ms": 4.3985,
+      "tau_ic_ms": 1.8303,
+      "t_star": 0.76,
+      "beta_max": 1.7483
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "water3.mp4",
+    "fluid_type": "water",
+    "fluid_label": "Pure water",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": 1.7981,
+      "U0_mm_per_s": 1161.2,
+      "contact_time_ms": 4.0043,
+      "max_spread_width_mm": 7.5733,
+      "beta_max": 4.2119
+    },
+    "dimensionless": {
+      "We": 33.388,
+      "Re": 2081.7,
+      "Oh": 0.002776,
+      "Ca": 0.016039,
+      "Fr": 8.743,
+      "beta_splash": 0.0786,
+      "tau_c_ms": 3.1634,
+      "tau_ic_ms": 1.5485,
+      "t_star": 1.27,
+      "beta_max": 4.2119
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "water4.mp4",
+    "fluid_type": "water",
+    "fluid_label": "Pure water",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": 2.1029,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 3.4133,
+      "beta_max": 1.6232
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "02182026",
+    "video": "water5.mp4",
+    "fluid_type": "water",
+    "fluid_label": "Pure water",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": 1.7067,
+      "U0_mm_per_s": 1048.99,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 3.3371,
+      "beta_max": 1.9554
+    },
+    "dimensionless": {
+      "We": 25.862,
+      "Re": 1784.9,
+      "Oh": 0.002849,
+      "Ca": 0.014489,
+      "Fr": 8.107,
+      "beta_splash": 0.0716,
+      "tau_c_ms": 2.9253,
+      "tau_ic_ms": 1.627,
+      "t_star": 1.14,
+      "beta_max": 1.9554
+    }
+  },
+  {
+    "folder": "02182026",
+    "video": "water6.mp4",
+    "fluid_type": "water",
+    "fluid_label": "Pure water",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": 1.7981,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 8.4114,
+      "beta_max": 4.678
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "0.001percent cg.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.6152,
+      "U0_mm_per_s": 1062.04,
+      "contact_time_ms": 7.0076,
+      "max_spread_width_mm": 3.5657,
+      "beta_max": 2.2075
+    },
+    "dimensionless": {
+      "We": 56.818,
+      "Re": 1695.0,
+      "Oh": 0.004447,
+      "Ca": 0.033521,
+      "Fr": 8.437,
+      "beta_splash": 0.0942,
+      "tau_c_ms": 4.0531,
+      "tau_ic_ms": 1.5208,
+      "t_star": 1.73,
+      "beta_max": 2.2075
+    }
+  },
+  {
+    "folder": "03242026",
+    "video": "0.028p.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.6305,
+      "U0_mm_per_s": 1090.74,
+      "contact_time_ms": 7.0076,
+      "max_spread_width_mm": 3.5505,
+      "beta_max": 2.1776
+    },
+    "dimensionless": {
+      "We": 60.498,
+      "Re": 1757.3,
+      "Oh": 0.004426,
+      "Ca": 0.034426,
+      "Fr": 8.624,
+      "beta_splash": 0.0964,
+      "tau_c_ms": 4.1108,
+      "tau_ic_ms": 1.4949,
+      "t_star": 1.7,
+      "beta_max": 2.1776
+    }
+  },
+  {
+    "folder": "03242026",
+    "video": "0.028percrnt tx.mp4",
+    "fluid_type": "tx_above_cmc",
+    "fluid_label": "CA + TX-100 above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.03,
+      "eta_Pa_s": 0.00102,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.4019,
+      "U0_mm_per_s": 1065.52,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 4.9371,
+      "beta_max": 3.5217
+    },
+    "dimensionless": {
+      "We": 52.948,
+      "Re": 1461.5,
+      "Oh": 0.004979,
+      "Ca": 0.036228,
+      "Fr": 9.086,
+      "beta_splash": 0.0942,
+      "tau_c_ms": 3.3848,
+      "tau_ic_ms": 1.3157,
+      "t_star": 29.58,
+      "beta_max": 3.5217
+    }
+  },
+  {
+    "folder": "03242026",
+    "video": "0.45percrnt sds.mp4",
+    "fluid_type": "sds_below_cmc",
+    "fluid_label": "CA + SDS below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.058,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.5543,
+      "U0_mm_per_s": 1098.24,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 5.3486,
+      "beta_max": 3.4412
+    },
+    "dimensionless": {
+      "We": 32.258,
+      "Re": 1703.6,
+      "Oh": 0.003334,
+      "Ca": 0.018935,
+      "Fr": 8.894,
+      "beta_splash": 0.0789,
+      "tau_c_ms": 2.8419,
+      "tau_ic_ms": 1.4153,
+      "t_star": 35.23,
+      "beta_max": 3.4412
+    }
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA SDS ABOVE CMC.mp4",
+    "fluid_type": "sds_above_cmc",
+    "fluid_label": "CA + SDS above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.037,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 999.0
+    },
+    "raw": {
+      "D0_mm": 1.3867,
+      "U0_mm_per_s": 1072.26,
+      "contact_time_ms": 9.3434,
+      "max_spread_width_mm": 3.2305,
+      "beta_max": 2.3297
+    },
+    "dimensionless": {
+      "We": 43.047,
+      "Re": 1485.4,
+      "Oh": 0.004417,
+      "Ca": 0.02898,
+      "Fr": 9.193,
+      "beta_splash": 0.0882,
+      "tau_c_ms": 2.9999,
+      "tau_ic_ms": 1.2932,
+      "t_star": 3.11,
+      "beta_max": 2.3297
+    }
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA SDS ABOVE CMC1.mp4",
+    "fluid_type": "sds_above_cmc",
+    "fluid_label": "CA + SDS above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.037,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 999.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 3.4895,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA SDS ABOVE CMC2.mp4",
+    "fluid_type": "sds_above_cmc",
+    "fluid_label": "CA + SDS above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.037,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 999.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 3.4438,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA cg ABOVE CMC1.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 65.4038,
+      "max_spread_width_mm": 2.0724,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA cg ABOVE CMC2.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.7371,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 19.4895,
+      "beta_max": 11.2193
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA cg ABOVE CMC3.mp4",
+    "fluid_type": "cg_above_cmc",
+    "fluid_label": "CA + CG/CAPB above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.032,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 0.579,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 45.3822,
+      "max_spread_width_mm": 3.0324,
+      "beta_max": 5.2368
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA cg less CMC1.mp4",
+    "fluid_type": "cg_below_cmc",
+    "fluid_label": "CA + CG/CAPB below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.052,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.5543,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 11.0119,
+      "max_spread_width_mm": 3.4286,
+      "beta_max": 2.2059
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA cg less CMC2.mp4",
+    "fluid_type": "cg_below_cmc",
+    "fluid_label": "CA + CG/CAPB below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.052,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 3.1086,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA cg less CMC3.mp4",
+    "fluid_type": "cg_below_cmc",
+    "fluid_label": "CA + CG/CAPB below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.052,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 6.4,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA sds less CMC1.mp4",
+    "fluid_type": "sds_below_cmc",
+    "fluid_label": "CA + SDS below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.058,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 0.7314,
+      "U0_mm_per_s": 1236.87,
+      "contact_time_ms": 3.3369,
+      "max_spread_width_mm": 6.461,
+      "beta_max": 8.8333
+    },
+    "dimensionless": {
+      "We": 19.253,
+      "Re": 902.8,
+      "Oh": 0.00486,
+      "Ca": 0.021325,
+      "Fr": 14.602,
+      "beta_splash": 0.0768,
+      "tau_c_ms": 0.9174,
+      "tau_ic_ms": 0.5913,
+      "t_star": 3.64,
+      "beta_max": 8.8333
+    }
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA sds less CMC2.mp4",
+    "fluid_type": "sds_below_cmc",
+    "fluid_label": "CA + SDS below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.058,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 3.1238,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA tx ABOVE CMC1.mp4",
+    "fluid_type": "tx_above_cmc",
+    "fluid_label": "CA + TX-100 above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.03,
+      "eta_Pa_s": 0.00102,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 3.4895,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA tx ABOVE CMC2.mp4",
+    "fluid_type": "tx_above_cmc",
+    "fluid_label": "CA + TX-100 above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.03,
+      "eta_Pa_s": 0.00102,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.3562,
+      "U0_mm_per_s": 1148.15,
+      "contact_time_ms": 3.6706,
+      "max_spread_width_mm": 3.4286,
+      "beta_max": 2.5281
+    },
+    "dimensionless": {
+      "We": 59.474,
+      "Re": 1523.5,
+      "Oh": 0.005062,
+      "Ca": 0.039037,
+      "Fr": 9.954,
+      "beta_splash": 0.0997,
+      "tau_c_ms": 3.2207,
+      "tau_ic_ms": 1.1812,
+      "t_star": 1.14,
+      "beta_max": 2.5281
+    }
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA tx ABOVE CMC3.mp4",
+    "fluid_type": "tx_above_cmc",
+    "fluid_label": "CA + TX-100 above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.03,
+      "eta_Pa_s": 0.00102,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 13.6814,
+      "max_spread_width_mm": 2.941,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA tx ABOVE CMC4.mp4",
+    "fluid_type": "tx_above_cmc",
+    "fluid_label": "CA + TX-100 above CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.03,
+      "eta_Pa_s": 0.00102,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 2.3467,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA tx less CMC1.mp4",
+    "fluid_type": "tx_below_cmc",
+    "fluid_label": "CA + TX-100 below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.05,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": null,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 3.3829,
+      "beta_max": null
+    },
+    "dimensionless": null
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA tx less CMC2.mp4",
+    "fluid_type": "tx_below_cmc",
+    "fluid_label": "CA + TX-100 below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.05,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.661,
+      "U0_mm_per_s": 1017.68,
+      "contact_time_ms": 5.0054,
+      "max_spread_width_mm": 3.4895,
+      "beta_max": 2.1009
+    },
+    "dimensionless": {
+      "We": 34.336,
+      "Re": 1670.3,
+      "Oh": 0.003508,
+      "Ca": 0.020557,
+      "Fr": 7.972,
+      "beta_splash": 0.0787,
+      "tau_c_ms": 3.3813,
+      "tau_ic_ms": 1.6321,
+      "t_star": 1.48,
+      "beta_max": 2.1009
+    }
+  },
+  {
+    "folder": "03242026",
+    "video": "ONLY CA tx less CMC3.mp4",
+    "fluid_type": "tx_below_cmc",
+    "fluid_label": "CA + TX-100 below CMC",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.05,
+      "eta_Pa_s": 0.00101,
+      "rho_kg_per_m3": 998.0
+    },
+    "raw": {
+      "D0_mm": 1.4629,
+      "U0_mm_per_s": 1077.69,
+      "contact_time_ms": 8.3423,
+      "max_spread_width_mm": 3.1543,
+      "beta_max": 2.1562
+    },
+    "dimensionless": {
+      "We": 33.913,
+      "Re": 1557.8,
+      "Oh": 0.003738,
+      "Ca": 0.021769,
+      "Fr": 8.996,
+      "beta_splash": 0.0808,
+      "tau_c_ms": 2.7948,
+      "tau_ic_ms": 1.3574,
+      "t_star": 2.98,
+      "beta_max": 2.1562
+    }
+  },
+  {
+    "folder": "03242026",
+    "video": "ca+TR.mp4",
+    "fluid_type": "ca_only",
+    "fluid_label": "CA nanoparticles in water (additive-free)",
+    "fluid_properties": {
+      "sigma_N_per_m": 0.0724,
+      "eta_Pa_s": 0.001,
+      "rho_kg_per_m3": 997.0
+    },
+    "raw": {
+      "D0_mm": 1.9048,
+      "U0_mm_per_s": null,
+      "contact_time_ms": 100.1079,
+      "max_spread_width_mm": 1.8743,
+      "beta_max": 0.984
+    },
+    "dimensionless": null
+  }
+]

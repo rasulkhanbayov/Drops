@@ -1,0 +1,90 @@
+/opt/anaconda3/2024.02-1/conda_envs/ml_dl_gpu_base/lib/python3.11/site-packages/sklearn/utils/_param_validation.py:11: UserWarning: A NumPy version >=1.23.5 and <2.3.0 is required for this version of SciPy (detected version 2.4.4)
+  from scipy.sparse import csr_matrix, issparse
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Loading fine-tuned model from /home/ubuntu/materials/finetune_data/qwen25vl_lora/final_adapter
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:00<00:02,  1.48it/s]Loading checkpoint shards:  40%|████      | 2/5 [00:01<00:01,  1.51it/s]Loading checkpoint shards:  60%|██████    | 3/5 [00:02<00:01,  1.49it/s]Loading checkpoint shards:  80%|████████  | 4/5 [00:02<00:00,  1.44it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:02<00:00,  1.92it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:02<00:00,  1.70it/s]
+Model ready.
+
+  water.mp4  (impact=436, liftoff=496)
+    f0424 [falling   ]  phase='falling'  cx=654.0  r=67.0  sw=None  conf=high  err_cx=2.0px
+    f0425 [falling   ]  phase='falling'  cx=650.0  r=67.0  sw=None  conf=high  err_cx=2.0px
+    f0426 [falling   ]  phase='falling'  cx=654.0  r=63.0  sw=None  conf=high  err_cx=2.0px
+    f0427 [falling   ]  phase='falling'  cx=654.0  r=70.0  sw=None  conf=high  err_cx=4.0px
+    f0428 [falling   ]  phase='falling'  cx=654.0  r=70.0  sw=None  conf=high  err_cx=4.0px
+    f0438 [spreading ]  phase='falling'  cx=654.0  r=57.0  sw=None  conf=high  err_cx=2.0px
+    f0439 [spreading ]  phase='spreading'  cx=654.0  r=57.0  sw=1279.0  conf=high  err_cx=2.0px
+    f0440 [spreading ]  phase='spreading'  cx=648.0  r=49.0  sw=1279.0  conf=high  err_cx=4.0px
+    f0441 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f0442 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f0496 [rebounding]  phase='rebounding'  cx=644.0  r=49.0  sw=None  conf=high  err_cx=8.0px
+    f0497 [rebounding]  phase='rebounding'  cx=648.0  r=37.0  sw=None  conf=high  err_cx=18.0px
+    f0498 [rebounding]  phase='rebounding'  cx=648.0  r=59.0  sw=None  conf=high  err_cx=2.0px
+    f0499 [rebounding]  phase='rebounding'  cx=648.0  r=49.0  sw=None  conf=high  err_cx=24.0px
+    f0500 [rebounding]  phase='rebounding'  cx=642.0  r=49.0  sw=None  conf=high  err_cx=0.0px
+
+  caonly1.mp4  (impact=100, liftoff=160)
+    f0088 [falling   ]  phase='falling'  cx=590.0  r=46.0  sw=None  conf=high
+    f0089 [falling   ]  phase='falling'  cx=590.0  r=42.0  sw=None  conf=high
+    f0090 [falling   ]  phase='falling'  cx=594.0  r=37.0  sw=None  conf=high
+    f0091 [falling   ]  phase='falling'  cx=590.0  r=37.0  sw=None  conf=high
+    f0092 [falling   ]  phase='falling'  cx=594.0  r=36.0  sw=None  conf=high
+    f0102 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f0103 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f0104 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f0105 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f0106 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f0160 [rebounding]  phase='rebounding'  cx=576.0  r=34.0  sw=None  conf=high
+    f0161 [rebounding]  phase='falling'  cx=576.0  r=32.0  sw=None  conf=high
+    f0162 [rebounding]  phase='falling'  cx=574.0  r=30.0  sw=None  conf=high
+    f0163 [rebounding]  phase='rebounding'  cx=574.0  r=29.0  sw=None  conf=high
+    f0164 [rebounding]  phase='rebounding'  cx=576.0  r=24.0  sw=None  conf=high
+
+  cainhsds1.mp4  (impact=1182, liftoff=1242)
+    f1170 [falling   ]  phase='falling'  cx=1126.0  r=87.0  sw=None  conf=high  err_cx=0.0px
+    f1171 [falling   ]  phase='falling'  cx=1126.0  r=87.0  sw=None  conf=high
+    f1172 [falling   ]  phase='falling'  cx=1126.0  r=87.0  sw=None  conf=high
+    f1173 [falling   ]  phase='falling'  cx=1126.0  r=87.0  sw=None  conf=high  err_cx=2.0px
+    f1174 [falling   ]  phase='falling'  cx=1126.0  r=87.0  sw=None  conf=high  err_cx=2.0px
+    f1184 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f1185 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f1186 [spreading ]  phase='spreading'  cx=None  r=None  sw=1279.0  conf=high
+    f1187 [spreading ]  phase='spreading'  cx=1126.0  r=84.0  sw=1279.0  conf=high
+    f1188 [spreading ]  phase='spreading'  cx=1126.0  r=84.0  sw=1279.0  conf=high  err_cx=0.0px
+    f1242 [rebounding]  phase='rebounding'  cx=1126.0  r=87.0  sw=None  conf=high  err_cx=112.0px
+    f1243 [rebounding]  phase='rebounding'  cx=1014.0  r=20.0  sw=None  conf=high  err_cx=112.0px
+    f1244 [rebounding]  phase='rebounding'  cx=1126.0  r=84.0  sw=None  conf=high  err_cx=0.0px
+    f1245 [rebounding]  phase='rebounding'  cx=1014.0  r=27.0  sw=None  conf=high  err_cx=4.0px
+    f1246 [rebounding]  phase='rebounding'  cx=1014.0  r=20.0  sw=None  conf=high  err_cx=0.0px
+
+════════════════════════════════════════════════════════════
+  FINE-TUNED MODEL — EVALUATION RESULTS
+════════════════════════════════════════════════════════════
+  Frames evaluated       : 45
+  Centroid-X MAE (px)    : 13.91  (n=22)
+  Centroid-Y MAE (px)    : 24.45  (n=22)
+  Radius MAE (px)        : 16.73  (n=22)
+  Spread-width MAE (px)  : 0.0  (n=14)
+  Phase accuracy         : 93.3%  (n=45)
+
+  In physical units:
+  Centroid-X MAE (mm)    : 0.212
+  Radius MAE (mm)        : 0.255
+  Spread-width MAE (mm)  : 0.0
+
+  Failure modes:
+    Null cx              : 10
+    Null radius          : 10
+    Null spread          : 1
+    Wrong phase          : 3
+
+────────────────────────────────────────────────────────────
+  COMPARISON: zero-shot vs fine-tuned
+────────────────────────────────────────────────────────────
+  Metric                         Gemini (0-shot)  GPT-4o-mini (0-shot)     Qwen FT
+  Centroid-X MAE (px)                      44.12                107.04       13.91
+  Centroid-Y MAE (px)                      68.65                107.12       24.45
+  Radius MAE (px)                          29.46                 41.81       16.73
+  Spread-width MAE (px)                   1062.0                1145.0         0.0
+  Phase accuracy (%)                        60.0                  51.1        93.3
+
+  Detailed results → /home/ubuntu/materials/eval_finetuned_results.json

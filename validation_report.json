@@ -1,0 +1,94 @@
+{
+  "scale_validation": {
+    "scale.mp4": {
+      "ticks_found": 8,
+      "mean_tick_spacing_px": 65.75,
+      "assumed_tick_mm": 1.0,
+      "measured_px_per_mm": 65.75,
+      "used_px_per_mm": 65.625,
+      "error_pct": 0.19
+    }
+  },
+  "velocity_validation": {
+    "expected_U0_mm_s": 1137.95,
+    "measured_mean_U0_mm_s": 1075.73,
+    "measured_std_U0_mm_s": 118.77,
+    "error_vs_theory_pct": 5.47,
+    "water_replicates": [
+      {
+        "video": "water.mp4",
+        "D0_mm": 2.2552,
+        "U0_mm_s": 1273.4,
+        "U0_err_pct": 11.9
+      },
+      {
+        "video": "water2.mp4",
+        "D0_mm": 2.24,
+        "U0_mm_s": 1223.82,
+        "U0_err_pct": 7.5
+      },
+      {
+        "video": "water3.mp4",
+        "D0_mm": 1.7981,
+        "U0_mm_s": 1161.2,
+        "U0_err_pct": 2.0
+      },
+      {
+        "video": "water5.mp4",
+        "D0_mm": 1.7067,
+        "U0_mm_s": 1048.99,
+        "U0_err_pct": 7.8
+      }
+    ]
+  },
+  "vlm_vs_cv_comparison": {
+    "video_level_D0_comparison": [
+      {
+        "video": "water.mp4",
+        "cv_D0_mm": 2.2552,
+        "cv_U0_mm_s": 1273.4,
+        "gemini_D0_mm": 1.481,
+        "gpt_D0_mm": 1.256,
+        "ft_D0_mm": 2.054
+      },
+      {
+        "video": "caonly1.mp4",
+        "cv_D0_mm": null,
+        "cv_U0_mm_s": null,
+        "gemini_D0_mm": 1.463,
+        "gpt_D0_mm": 1.128,
+        "ft_D0_mm": 1.207
+      },
+      {
+        "video": "cainhsds1.mp4",
+        "cv_D0_mm": 2.621,
+        "cv_U0_mm_s": 564.65,
+        "gemini_D0_mm": 1.219,
+        "gpt_D0_mm": 0.506,
+        "ft_D0_mm": 2.651
+      }
+    ],
+    "frame_level_MAE": {
+      "gemini": {
+        "cx_px": 44.12,
+        "radius_px": 29.46,
+        "spread_px": 1062.0
+      },
+      "finetuned": {
+        "cx_px": 13.91,
+        "radius_px": 16.73,
+        "spread_px": 0.0
+      }
+    },
+    "phase_accuracy_pct": {
+      "gemini": 51.1,
+      "finetuned": 93.3
+    }
+  },
+  "beta_max_summary": {
+    "min": 0.262,
+    "max": 11.219,
+    "mean": 2.877,
+    "n": 39
+  }
+}

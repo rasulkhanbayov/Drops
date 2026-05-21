@@ -1,0 +1,23 @@
+# Raw video files (too large for GitHub)
+02182026/*.mp4
+03242026_particlesonlypreparedinsurfactant/*.mp4
+05052026/*.mp4
+
+# Spreading frame images
+02182026/Spreading/
+05052026/Spreading/
+
+# Large binary/image files
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.ods
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log

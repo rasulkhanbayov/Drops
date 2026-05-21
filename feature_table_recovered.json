@@ -1,0 +1,68 @@
+[
+  {
+    "video": "cainhcg2.mp4",
+    "folder": "02182026",
+    "pre_impact_diameter_mm": 2.0419,
+    "impact_velocity_mm_per_s": 836.57
+  },
+  {
+    "video": "cainhsds1.mp4",
+    "folder": "02182026",
+    "pre_impact_diameter_mm": 2.621,
+    "impact_velocity_mm_per_s": 564.65
+  },
+  {
+    "video": "cainlsds1.mp4",
+    "folder": "02182026",
+    "pre_impact_diameter_mm": 5.6732,
+    "impact_velocity_mm_per_s": 9.34
+  },
+  {
+    "video": "caonly1.mp4",
+    "folder": "02182026",
+    "pre_impact_diameter_mm": 5.3301,
+    "impact_velocity_mm_per_s": 2.38
+  },
+  {
+    "video": "water4.mp4",
+    "folder": "02182026",
+    "pre_impact_diameter_mm": 2.1029,
+    "impact_velocity_mm_per_s": 140.0
+  },
+  {
+    "video": "water6.mp4",
+    "folder": "02182026",
+    "pre_impact_diameter_mm": 1.7981,
+    "impact_velocity_mm_per_s": 101.3
+  },
+  {
+    "video": "0.028percrnt tx.mp4",
+    "folder": "03242026",
+    "pre_impact_diameter_mm": 1.4019,
+    "impact_velocity_mm_per_s": 1065.52
+  },
+  {
+    "video": "0.45percrnt sds.mp4",
+    "folder": "03242026",
+    "pre_impact_diameter_mm": 1.5543,
+    "impact_velocity_mm_per_s": 1098.24
+  },
+  {
+    "video": "ONLY CA SDS ABOVE CMC.mp4",
+    "folder": "03242026",
+    "pre_impact_diameter_mm": 1.3867,
+    "impact_velocity_mm_per_s": 1072.26
+  },
+  {
+    "video": "ONLY CA cg ABOVE CMC3.mp4",
+    "folder": "03242026",
+    "pre_impact_diameter_mm": 0.579,
+    "impact_velocity_mm_per_s": null
+  },
+  {
+    "video": "ONLY CA cg less CMC1.mp4",
+    "folder": "03242026",
+    "pre_impact_diameter_mm": 1.5543,
+    "impact_velocity_mm_per_s": null
+  }
+]
