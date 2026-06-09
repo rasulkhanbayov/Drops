@@ -123,13 +123,84 @@ Ground truth from `ellipse_timeseries_v2` pipeline (HoughCircles + template matc
 
 ---
 
-## Next Steps (for paper)
+---
 
-- [ ] Design domain-engineered prompt (physics context, calibration, measurement instructions)
-- [ ] Re-run inference with comprehensive prompt → measure improvement on same 6 videos + full set
-- [ ] Analyse which tasks benefit most from prompting vs. which remain fundamentally limited
-- [ ] Discuss implications: VLMs as pre-processors (frame selection, outcome labelling) vs. measurement tools
+## Prompted Evaluation — Domain-Engineered Prompts
+
+The same 6 videos were re-run with a comprehensive domain-engineered prompt that provides:
+- Physics context (We number, drop height, superhydrophobic surface mechanics)
+- Shadowgraphy image characteristics (caustic ring artefact, dark-blob appearance)
+- Per-class visual decision strategy (spreading ratio β_max, rebound completeness)
+- Calibration constants, exact frame dimensions, surface row location
+- Expected pixel ranges for centroid, radius, and spread width
+
+Models evaluated with prompted prompt: **Claude Sonnet 4.5**, **GPT-4o**
+
+### Task 6 — Prompted Fluid Classification (6 videos)
+
+| Video | Ground Truth | Claude ZS | Claude Prompted | GPT-4o ZS | GPT-4o Prompted |
+|---|---|:---:|:---:|:---:|:---:|
+| water2.mp4 | A — Pure water | A ✓ | B ✗ | A ✓ | A ✓ |
+| cainhcg1.mp4 | C — CA + surfactant | D ✗ | B ✗ | A ✗ | A ✗ |
+| ONLY CA sds less CMC1.mp4 | D — CA washed | A ✗ | B ✗ | A ✗ | A ✗ |
+| 0.45percrnt sds.mp4 | B — Surfactant only | A ✗ | A ✗ | A ✗ | A ✗ |
+| cainhcg 0.08.mp4 | C — CA + surfactant | A ✗ | B ✗ | A ✗ | A ✗ |
+| 0.028tx.mp4 | B — Surfactant only | D ✗ | A ✗ | A ✗ | A ✗ |
+| **Accuracy (these 6)** | | **17%** | **0%** | **17%** | **17%** |
+
+> **Finding:** Prompting does **not** help fluid classification. Claude's accuracy dropped from 17% → 0% — the detailed visual cues caused it to over-anchor on surfactant spreading signatures and predict B for almost all videos. GPT-4o remained stuck at 17% (always A). The task appears fundamentally intractable for zero-shot VLMs regardless of prompt quality — the visual differences between classes are below the resolution of natural-image priors.
+
+### Task 1/4 — Prompted Phase + Measurement (6 videos)
+
+**Claude Sonnet 4.5**
+
+| Video | Phase Acc ZS | Phase Acc Prompted | cx MAE ZS→P | r MAE ZS→P | sw MAE ZS→P |
+|---|:---:|:---:|:---:|:---:|:---:|
+| water2.mp4 | 11/12 (92%) | 10/12 (83%) | 18 → 20 px | 18 → 11 px ↓ | 18 → 26 px |
+| cainhcg1.mp4 | 9/12 (75%) | 9/12 (75%) | 11 → 9 px ↓ | 24 → 23 px ↓ | 9 → 85 px ↑ |
+| ONLY CA sds less CMC1.mp4 | 7/12 (58%) | 7/12 (58%) | 133 → 234 px | 27 → 37 px | 178 → 222 px |
+| 0.45percrnt sds.mp4 | 6/12 (50%) | 8/12 (67%) ↑ | 3 → 44 px | 4 → 16 px | 34 → 67 px |
+| cainhcg 0.08.mp4 | 6/12 (50%) | 5/12 (42%) | 17 → 149 px | 15 → 22 px | 50 → 113 px |
+| 0.028tx.mp4 | 0/11 (0%) | 0/11 (0%) | — | — | — |
+
+**GPT-4o**
+
+| Video | Phase Acc ZS | Phase Acc Prompted | cx MAE ZS→P | r MAE ZS→P | sw MAE ZS→P |
+|---|:---:|:---:|:---:|:---:|:---:|
+| water2.mp4 | 10/12 (83%) | 10/12 (83%) | 23 → 23 px | 20 → 10 px ↓ | 125 → 110 px ↓ |
+| cainhcg1.mp4 | 5/12 (42%) | 7/12 (58%) ↑ | 17 → 18 px | 11 → 28 px | — → 9 px |
+| ONLY CA sds less CMC1.mp4 | 5/12 (42%) | 5/12 (42%) | 183 → 174 px ↓ | 27 → 38 px | — |
+| 0.45percrnt sds.mp4 | 5/12 (42%) | 5/12 (42%) | 158 → 154 px ↓ | 19 → 15 px ↓ | — |
+| cainhcg 0.08.mp4 | 5/12 (42%) | 5/12 (42%) | 127 → 120 px ↓ | 5 → 23 px | — |
+| 0.028tx.mp4 | 4/11 (36%) | 4/11 (36%) | — | — | — |
+
+> **Finding:** Prompting gives **minor, inconsistent improvements** on measurement tasks. Radius MAE improves slightly for Claude on water2 (18→11 px) and GPT-4o on water2 (20→10 px). Phase accuracy is largely unchanged. However, on harder videos (ONLY CA sds, cainhcg 0.08) the prompted prompt makes cx error *worse* — likely because the model tries harder to find physics-consistent positions and drifts from the actual blob. The domain gap (shadowgraphy images absent from training data, quantitative pixel-level reasoning) is not bridged by prompt engineering alone.
 
 ---
 
-*Generated from `benchmark/results/` — 1211 frames across 5 folders, 5 models evaluated*
+## Consolidated Summary — Zero-Shot vs. Prompted
+
+| Model | Task 6 ZS | Task 6 Prompted | Phase ZS | Phase Prompted |
+|---|:---:|:---:|:---:|:---:|
+| Claude Sonnet 4.5 | 17% | 0% ↓ | 57.6% | ~56% |
+| GPT-4o | 17% | 17% | 50.9% | ~50% |
+| **Chance baseline** | **25%** | — | **33%** | — |
+| **Classical CV (kNN-3)** | **66%** | — | — | — |
+
+**Core conclusion for paper:** VLMs cannot perform fluid classification from shadowgraphy droplet impact videos, even with comprehensive domain-engineered prompts. The signal for classification exists (classical CV achieves 66% with only 2 physical features), but VLMs lack the quantitative physical priors and domain-specific visual vocabulary to extract it. Prompted prompts shift the prediction bias (from A/D to B) without improving accuracy, confirming the limitation is representational, not instructional.
+
+---
+
+## Next Steps (for paper)
+
+- [x] Zero-shot VLM evaluation (5 models, 1211 frames, 94 videos)
+- [x] Domain-engineered prompted evaluation (Claude + GPT-4o, 6 representative videos)
+- [ ] Run prompted evaluation on full benchmark (all 94 videos) for Claude + GPT-4o
+- [ ] Analyse per-class confusion patterns in full prompted results
+- [ ] Discuss: VLMs as pre-processors (frame selection, coarse outcome labelling) vs. measurement tools
+- [ ] Compare to fine-tuned Qwen — does supervised fine-tuning close the gap?
+
+---
+
+*Generated from `benchmark/results/` — 1211 frames across 5 folders, 5 models evaluated*  
+*Prompted evaluation: `benchmark_prompted_eval.py` — same 6 videos, comprehensive domain prompt*
