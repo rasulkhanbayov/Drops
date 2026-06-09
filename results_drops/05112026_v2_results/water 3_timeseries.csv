@@ -1,0 +1,2 @@
+frame,slice,phase,area,mean,min,max,X,Y,major,minor,angle,circ,feret,feret_x,feret_y,feret_angle,min_feret,AR,roundness,solidity,length,D_px,D_mm,beta,time_ms,Y_dist_px,dist_travelled_px,velocity_px_s,px_per_mm,velocity_mm_s
+91,1,spreading,,,,,,304,,,,,,,,,,,0.0,,0,,,,6.6739,0,,,66.5,

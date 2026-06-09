@@ -1,0 +1,28 @@
+% preamble.tex — additional packages for PhysDrop paper
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
+% subcaption already loaded by wacv.sty
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage{siunitx}
+\usepackage{enumitem}
+\usepackage{tablefootnote}
+
+% Convenient math macros
+\newcommand{\betamax}{\ensuremath{\beta_{\max}}}
+\newcommand{\cor}{\ensuremath{\eta}}
+\newcommand{\Dzero}{\ensuremath{D_0}}
+\newcommand{\Uzero}{\ensuremath{U_0}}
+\newcommand{\We}{\ensuremath{\mathrm{We}}}
+\newcommand{\Oh}{\ensuremath{\mathrm{Oh}}}
+
+% Table helpers
+\newcommand{\best}[1]{\textbf{#1}}
+\newcommand{\second}[1]{\underline{#1}}
+\definecolor{failred}{rgb}{0.8,0.1,0.1}
+\newcommand{\fail}[1]{{\color{failred}#1}}

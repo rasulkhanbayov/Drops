@@ -1,0 +1,59 @@
+Sample preparation
+
+5 ml of 2% Cellulose Acetate (CA) in acetone prepared
+
+10 mls of surfactant solution above and below the Critical Micellar Concentration (CMC) added to the CA solution so CA conc becomes 1% while rapidly stirring the solution. The CA precipitates out in the form of nanoparticles (NP). Acetone is removed via leaving the open vial stirring at room temperature overnight.
+
+Three surfactants, SDS, TX-100 and cocoglysomate are used above and below critical micellar concentration to investigate morphological changes in NP.
+
+Particles prepared with the three surfactants have different morphologies. To investigate the effect of particle morphology, in this batch the surfactant was removed and particles resuspended in DI water. This ensured only the effect of particles on bouncing/wetting is observed. 
+
+To remove surfactants, 1 mL of the prepared dispersions was centrifuged for 10 minutes. The supernatant was carefully removed, and the pellet was resuspended in deionized (DI) water. As the surfactant is water-soluble, it partitions into the aqueous phase and is removed with the supernatant during each washing step. This process (centrifugation followed by resuspension in DI water) was repeated two additional times to ensure complete removal of surfactant from the particle surface.
+
+
+Wetting experiment:
+
+
+
+The NP samples prepared (in presence of different surfactant solution, after particle formation surfactants were removed through centrifugation entailed washing) as per above methodology were dropped (4 microlitres) via a micropipette on superhydrophobic coating on glass slide from a height of **6.6 cm**. The droplet's bouncing behavior was captured via a high speed camera at above 2000 frames per second. The runs were conducted in replicates (minimum 3). 
+
+Each sample contains water and nanoparticles. CMC values of each surfactant was identified from literature. For h above CMC, cocncentration 2x above CMC was used and for l concentration 0.5x times CMC was used
+
+SDS CMC = 0.225 wt.%
+TX CMC = 0.014 wt.%
+CG CMC = 0.005 wt.%
+
+Sample key
+
+only CA SDS above CMC - 1% nanoparticles (prepared in SDS above CMC at 0.45wt.%. SDS removed after particle formation) in DI water
+
+only CA SDS less CMC - 1% nanoparticles (prepared in SDS below CMC at 0.112wt.%. SDS removed after particle formation) in DI water
+
+only CA TX above CMC - 1% nanoparticles (prepared in TX above CMC at 0.028 wt.%. TX removed after particle formation) in DI water
+
+only CA TX less CMC - 1% nanoparticles (prepared in TX below CMC at 0.007wt.%. TX removed after particle formation) in DI water
+
+only CA CG above CMC - 1% nanoparticles (prepared in CG above CMC at 0.01 wt.%. CG removed after particle formation) in DI water
+
+only CA CG less CMC - 1% nanoparticles (prepared in CG below CMC at 0.003wt.%. CG removed after particle formation) in DI water
+
+0.001% CG -  0.001% CG solution in DI water (no nanoparticles, only surfactant solution as control)
+
+0.028% TX- 0.028% TX solution in DI water (no nanoparticles, only surfactant solution as control)
+
+0.45% SDS- 0.45% SDS solution in DI water (no nanoparticles, only surfactant solution as control)
+
+
+* While the droplets were dropped from a height of 6.6 cm, the videos' frame of view only captures a small area at the bottom and not the entire 6.6 cm. This is because at the high frame rates that we are running the camera, the field of view is limited.
+
+
+
+Magnification
+
+Same as 02182026 folder [The distance between the camera and the glass slide was kept same between runs to ensure uniform magnification. Also for scaling, an image of a scale was taken in both horizontal and vertical orientations to facilitate calculation of travel distances - videos are om 02182026 folder]
+
+Parameters to be extracted:
+1. Initial velocity - droplet is dropped from 6.6 cm height. Due to ejection thrust from pipette, the initial velocity may slightly differ from the free fall velocity and this can be estimated via the distance covered by the droplet between frames prior to hitting the surface and bouncinh
+2. Velocity after the droplet hits the super hydrophobic coating. This will vary between samples
+3. Droplet diameter before and after impact. This will vary since the droplet may fragment and part of it is left between while part of it bounces
+4. The maximum spreading diameter when the droplet settles on the surface.

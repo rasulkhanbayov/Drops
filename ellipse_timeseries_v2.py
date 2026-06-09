@@ -25,6 +25,7 @@ Outputs to separate paths so v1 is untouched:
   /home/ubuntu/materials/summary_timeseries_v2.json
 """
 
+import argparse
 import cv2
 import json
 import csv
@@ -32,13 +33,17 @@ import numpy as np
 from pathlib import Path
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-FPS_ACTUAL    = 2996.766489
-PX_PER_MM     = 65.625
-PX_PER_MM_NEW = 66.0
+FPS_ACTUAL      = 2996.766489
+PX_PER_MM       = 65.625
+PX_PER_MM_NEW   = 66.0
+PX_PER_MM_NEW1  = 66.5   # new_experiments/05112026
+PX_PER_MM_NEW2  = 56.0   # new_experiments/05122026
 
-VIDEOS_02 = Path("/home/ubuntu/materials/02182026")
-VIDEOS_03 = Path("/home/ubuntu/materials/03242026_particlesonlypreparedinsurfactant")
-VIDEOS_05 = Path("/home/ubuntu/materials/05052026")
+VIDEOS_02   = Path("/home/ubuntu/materials/02182026")
+VIDEOS_03   = Path("/home/ubuntu/materials/03242026_particlesonlypreparedinsurfactant")
+VIDEOS_05   = Path("/home/ubuntu/materials/05052026")
+VIDEOS_NEW1 = Path("/home/ubuntu/materials/new_experiments/05112026")
+VIDEOS_NEW2 = Path("/home/ubuntu/materials/new_experiments/05122026")
 
 FEATURE_JSON = Path("/home/ubuntu/materials/feature_table.json")
 OUT_DIR      = Path("/home/ubuntu/materials/timeseries_v2")
@@ -321,6 +326,35 @@ def template_track(video_path, impact_frame, surface_y, radius_px,
     return positions, confidences
 
 
+def template_d0_search(video_path, impact_frame, surface_y, px_per_mm,
+                       lookback=40, r_min=50, r_max=110, r_step=5):
+    """
+    FIX 1 – Multi-scale template D0 estimation.
+
+    Sweeps candidate radii r_min..r_max in r_step increments, runs
+    template_track at each, and picks the radius whose matches score
+    highest (mean_confidence × n_matches).  Only called when HoughCircles
+    D0 is suspicious (< 60 px or < 3 detections), so it costs nothing for
+    normal videos.
+
+    Returns (D0_px, best_positions).
+    """
+    best_r, best_score, best_positions = None, -1.0, []
+    for r in range(r_min, r_max + 1, r_step):
+        positions, confs = template_track(
+            video_path, impact_frame, surface_y,
+            float(r), px_per_mm, lookback=lookback, conf_thresh=0.25)
+        if len(confs) >= 2:
+            score = float(np.mean(confs)) * len(confs)
+            if score > best_score:
+                best_score     = score
+                best_r         = r
+                best_positions = positions
+    if best_r is None:
+        return None, [], 0.0
+    return float(best_r * 2), best_positions, best_score
+
+
 def optical_flow_track(video_path, seed_frame, seed_cx, seed_cy,
                        surface_y, lookback=20):
     """
@@ -494,6 +528,16 @@ def compute_u0(video_path, impact_frame, surface_y, D0_px, px_per_mm,
         if u0 is not None and u0 >= 100:
             return u0, "template", tmpl_pos
 
+    # ── Attempt 1b: template at reduced confidence (FIX 2) ────────────────
+    if len(tmpl_pos) < 3:
+        tmpl_pos_lc, _ = template_track(
+            video_path, impact_frame, surface_y,
+            radius_px, px_per_mm, lookback=lookback, conf_thresh=0.20)
+        if len(tmpl_pos_lc) >= 3:
+            u0 = median_pairwise_speed(tmpl_pos_lc, FPS_ACTUAL, px_per_mm)
+            if u0 is not None and u0 >= 100:
+                return u0, "template_lc", tmpl_pos_lc
+
     # ── Attempt 2: optical flow from last HoughCircles seed ───────────────
     if pre_pos:
         # Use the HoughCircles detection closest to impact as the seed
@@ -523,8 +567,21 @@ def compute_u0(video_path, impact_frame, surface_y, D0_px, px_per_mm,
 
 
 def scan_rebound(video_path, liftoff_frame, surface_y, px_per_mm,
-                 search_frames=30):
-    """Rebound phase — same as v1."""
+                 D0_px=None, search_frames=30):
+    """
+    Rebound phase — FIX 3: D0-constrained radius bounds.
+
+    Constraining HoughCircles to ±40% of the known droplet radius eliminates
+    most false detections (nozzle shadow, surface reflections) that were
+    causing U_rebound > U0 and suppressing COR computation.
+    """
+    if D0_px:
+        r0    = D0_px / 2.0
+        r_min = max(30, int(r0 * 0.60))
+        r_max = min(130, int(r0 * 1.45))
+    else:
+        r_min, r_max = 40, 110
+
     rows, positions = [], []
     miss, down_count = 0, 0
     prev_cy = None
@@ -536,9 +593,9 @@ def scan_rebound(video_path, liftoff_frame, surface_y, px_per_mm,
         if frame is None:
             break
         gray = preprocess(frame)
-        det  = hough_detect(gray, min_r=40, max_r=110,
+        det  = hough_detect(gray, min_r=r_min, max_r=r_max,
                             prefer_largest=False,
-                            radius_min_accept=40, radius_max_accept=110)
+                            radius_min_accept=r_min, radius_max_accept=r_max)
         if det is None:
             miss += 1
             if miss >= 3:
@@ -613,7 +670,7 @@ def process_spreading(video_path, impact_frame, liftoff_frame,
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-def main():
+def main(folder_filter=None, out_dir_override=None):
     features = json.loads(FEATURE_JSON.read_text())
 
     video_dir_map = {
@@ -622,6 +679,18 @@ def main():
     }
     if VIDEOS_05.exists():
         video_dir_map["05052026"] = (VIDEOS_05, PX_PER_MM_NEW)
+    if VIDEOS_NEW1.exists():
+        video_dir_map["05112026"] = (VIDEOS_NEW1, PX_PER_MM_NEW1)
+    if VIDEOS_NEW2.exists():
+        video_dir_map["05122026"] = (VIDEOS_NEW2, PX_PER_MM_NEW2)
+
+    active_out_dir = Path(out_dir_override) if out_dir_override else OUT_DIR
+    active_out_dir.mkdir(parents=True, exist_ok=True)
+    active_summary_json = (
+        active_out_dir / "summary_timeseries_v2.json"
+        if out_dir_override
+        else SUMMARY_JSON
+    )
 
     summary = []
     print("Processing videos (v2: template matching + impact refinement)...\n")
@@ -629,6 +698,8 @@ def main():
     for f in features:
         folder_key = f["folder"]
         if folder_key not in video_dir_map:
+            continue
+        if folder_filter and folder_key != folder_filter:
             continue
 
         video_dir, px_per_mm = video_dir_map[folder_key]
@@ -649,6 +720,37 @@ def main():
         D0_vals = [r["D_px"] for r in pre_rows if r["D_px"]]
         D0_px   = float(np.median(D0_vals[-5:])) if D0_vals else None
         D0_mm   = round(D0_px / px_per_mm, 4) if D0_px else None
+
+        # ── FIX 1: template D0 cross-check ───────────────────────────────
+        # Four conditions trigger the fallback (unreliable Hough D0):
+        #   (a) D0_px < 60 px — physically too small
+        #   (b) fewer than 3 Hough detections
+        #   (c) D0_px in 82–98 px — Hough stuck at minimum radius R_MIN=45 px
+        #   (d) D0_px > 155 px — Hough latched onto nozzle instead of droplet
+        #       (correct D0_px in dataset ≤ 154 px; nozzle appears at ~208 px)
+        d0_source   = "hough"
+        _hough_too_large = D0_px is not None and D0_px > 155
+        _tmpl_d0_needed = (D0_px is None
+                           or D0_px < 60
+                           or len(pre_rows) < 3
+                           or (D0_px is not None and 82 < D0_px < 98)
+                           or _hough_too_large)
+        if _tmpl_d0_needed:
+            tmpl_d0_px, _, _ = template_d0_search(
+                video_path, impact_frame, surface_y, px_per_mm, lookback=40)
+            if tmpl_d0_px is not None:
+                # nozzle case: accept template if it's ≥30% SMALLER than Hough
+                # small-D case: accept template if it's ≥30% LARGER than Hough
+                if D0_px is None:
+                    accept = True
+                elif _hough_too_large:
+                    accept = tmpl_d0_px < D0_px * 0.70
+                else:
+                    accept = tmpl_d0_px > D0_px * 1.30
+                if accept:
+                    D0_px     = tmpl_d0_px
+                    D0_mm     = round(D0_px / px_per_mm, 4)
+                    d0_source = "template"
 
         if not pre_rows:
             time_zero = max(0, impact_frame - 20)
@@ -677,7 +779,7 @@ def main():
 
         # ── 3. Rebound phase ──────────────────────────────────────────────
         reb_rows, reb_pos = scan_rebound(
-            video_path, liftoff_frame, surface_y, px_per_mm)
+            video_path, liftoff_frame, surface_y, px_per_mm, D0_px=D0_px)
 
         U_rebound = median_pairwise_speed(reb_pos, FPS_ACTUAL, px_per_mm)
         COR = round(U_rebound / U0, 4) \
@@ -696,7 +798,7 @@ def main():
 
         # ── 5. Write per-video CSV ────────────────────────────────────────
         all_rows = pre_rows + spread_rows + reb_rows
-        out_csv  = OUT_DIR / f["video"].replace(".mp4", "_timeseries.csv")
+        out_csv  = active_out_dir / f["video"].replace(".mp4", "_timeseries.csv")
         with open(out_csv, "w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=CSV_FIELDS, extrasaction="ignore")
             w.writeheader()
@@ -705,8 +807,9 @@ def main():
         contact_ms = round((liftoff_frame - impact_frame_ref) / FPS_ACTUAL * 1000, 4)
         impact_shift = impact_frame_ref - impact_frame  # +ve = later, -ve = earlier
 
-        print(f"D0={D0_mm}mm  U0={U0}mm/s({u0_method})  β={beta_max}  "
-              f"U_reb={U_rebound}mm/s  COR={COR}  "
+        beta_flag = " ⚠β>5" if (beta_max and beta_max > 5.0) else ""
+        print(f"D0={D0_mm}mm({d0_source})  U0={U0}mm/s({u0_method})  "
+              f"β={beta_max}{beta_flag}  U_reb={U_rebound}mm/s  COR={COR}  "
               f"Δimp={impact_shift:+d}  pre/sp/reb="
               f"{len(pre_rows)}/{len(spread_rows)}/{len(reb_rows)}")
 
@@ -732,11 +835,13 @@ def main():
             "pre_impact_frames":   len(pre_rows),
             "spreading_frames":    len(spread_rows),
             "rebound_frames":      len(reb_rows),
+            "D0_source":           d0_source,
+            "beta_outlier":        beta_max is not None and beta_max > 5.0,
         })
 
-    SUMMARY_JSON.write_text(json.dumps(summary, indent=2))
-    print(f"\nCSVs  → {OUT_DIR}/")
-    print(f"Summary → {SUMMARY_JSON}\n")
+    active_summary_json.write_text(json.dumps(summary, indent=2))
+    print(f"\nCSVs  → {active_out_dir}/")
+    print(f"Summary → {active_summary_json}\n")
 
     # ── Final table ───────────────────────────────────────────────────────
     print(f"  {'Video':<38} {'D0':>6} {'U0':>8} {'method':<14} "
@@ -756,6 +861,11 @@ def main():
     from collections import Counter
     methods = Counter(s["U0_method"] for s in summary)
     print(f"\n  U0 method counts: {dict(methods)}")
+    d0_srcs = Counter(s["D0_source"] for s in summary)
+    print(f"  D0 source counts: {dict(d0_srcs)}")
+    outliers = [s["video"] for s in summary if s.get("beta_outlier")]
+    if outliers:
+        print(f"  β outliers (>5): {outliers}")
 
     cors = [s["COR"] for s in summary if s["COR"] and 0 < s["COR"] <= 1]
     if cors:
@@ -793,4 +903,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    p = argparse.ArgumentParser(description="ellipse_timeseries_v2 — droplet impact analysis")
+    p.add_argument("--folder", default=None,
+                   help="Only process this dataset folder key (e.g. 02182026, 05052026)")
+    p.add_argument("--outdir", default=None,
+                   help="Override output directory for CSVs and summary JSON")
+    args = p.parse_args()
+    main(folder_filter=args.folder, out_dir_override=args.outdir)

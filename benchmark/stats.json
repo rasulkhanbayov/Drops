@@ -1,0 +1,26 @@
+{
+  "total": 1211,
+  "by_task": {
+    "task1_phase_and_measurement": 1117,
+    "task6_fluid_classification": 94
+  },
+  "by_fluid_class": {
+    "CA_with_surfactant": 453,
+    "CA_washed": 308,
+    "surfactant_only": 311,
+    "pure_water": 139
+  },
+  "by_folder": {
+    "02182026": 388,
+    "03242026": 295,
+    "05052026": 220,
+    "05112026": 87,
+    "05122026": 221
+  },
+  "task6_choice_distribution": {
+    "A": 11,
+    "B": 24,
+    "C": 35,
+    "D": 24
+  }
+}

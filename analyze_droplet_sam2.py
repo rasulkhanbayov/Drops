@@ -122,18 +122,21 @@ def find_reference_droplet(video_path: str, bg_frames: int,
     return None, None, None, None
 
 
-def extract_frames_to_dir(video_path: str, out_dir: str) -> int:
-    """Extract all video frames as JPEG files. SAM2 video predictor requires this."""
+def extract_frames_to_dir(video_path: str, out_dir: str, frame_step: int = 1) -> int:
+    """Extract video frames as JPEG files (every frame_step-th frame)."""
     cap = cv2.VideoCapture(video_path)
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    written = 0
     for i in range(total):
         ret, frame = cap.read()
         if not ret:
             break
-        cv2.imwrite(os.path.join(out_dir, f"{i:06d}.jpg"), frame,
-                    [cv2.IMWRITE_JPEG_QUALITY, 95])
+        if i % frame_step == 0:
+            cv2.imwrite(os.path.join(out_dir, f"{written:06d}.jpg"), frame,
+                        [cv2.IMWRITE_JPEG_QUALITY, 95])
+            written += 1
     cap.release()
-    return total
+    return written
 
 
 # ── main ───────────────────────────────────────────────────────────────────
@@ -141,7 +144,8 @@ def extract_frames_to_dir(video_path: str, out_dir: str) -> int:
 def main(video_path: str, output_csv: str,
          checkpoint: str, model_cfg: str,
          bg_frames: int, diff_thresh: int,
-         min_area: int, circ_thresh: float, margin: int):
+         min_area: int, circ_thresh: float, margin: int,
+         frame_step: int = 1):
 
     if not os.path.isfile(video_path):
         raise FileNotFoundError(f"Video not found: {video_path}")
@@ -164,6 +168,8 @@ def main(video_path: str, output_csv: str,
     cap_info.release()
     print(f"Video  : {video_path}")
     print(f"Size   : {frame_w}x{frame_h}  |  {total_frames} frames  |  {fps:.1f} fps")
+    if frame_step > 1:
+        print(f"Frame step: {frame_step} (sampling every {frame_step}th frame → ~{total_frames // frame_step} frames)")
 
     # ── Step 1: locate reference frame ────────────────────────────────────
     print(f"\nScanning for first fully-visible droplet frame...")
@@ -180,9 +186,13 @@ def main(video_path: str, output_csv: str,
 
     # ── Step 2: extract frames ────────────────────────────────────────────
     frame_dir = tempfile.mkdtemp(prefix="sam2_droplet_")
-    print(f"\nExtracting {total_frames} frames to {frame_dir} ...")
-    extract_frames_to_dir(video_path, frame_dir)
+    sampled_count = (total_frames + frame_step - 1) // frame_step
+    print(f"\nExtracting frames to {frame_dir} ...")
+    extract_frames_to_dir(video_path, frame_dir, frame_step)
     print("Extraction complete.")
+
+    # ref_idx in original video → index in the subsampled sequence
+    ref_idx_sam = ref_idx // frame_step
 
     # ── Step 3: SAM2 tracking ─────────────────────────────────────────────
     rows = []
@@ -200,16 +210,16 @@ def main(video_path: str, output_csv: str,
             # Prompt SAM2 with the centroid found via OpenCV
             _, _, _ = predictor.add_new_points_or_box(
                 inference_state=state,
-                frame_idx=ref_idx,
+                frame_idx=ref_idx_sam,
                 obj_id=1,
                 points=np.array([[ref_cx, ref_cy]], dtype=np.float32),
                 labels=np.array([1], dtype=np.int32),
             )
 
             print("Propagating masks through video...")
-            for frame_idx, obj_ids, masks_logits in predictor.propagate_in_video(state):
+            for sam_idx, obj_ids, masks_logits in predictor.propagate_in_video(state):
                 # Skip frames before the reference (no droplet yet)
-                if frame_idx < ref_idx:
+                if sam_idx < ref_idx_sam:
                     continue
 
                 # masks_logits: (num_objects, 1, H, W)
@@ -227,6 +237,7 @@ def main(video_path: str, output_csv: str,
                 if not components:
                     continue
 
+                actual_frame = sam_idx * frame_step
                 for drop_id, (comp_mask, area) in enumerate(components, start=1):
                     centroid = mask_centroid(comp_mask)
                     if centroid is None:
@@ -234,7 +245,7 @@ def main(video_path: str, output_csv: str,
                     cx, cy = centroid
                     pct = round(area / reference_area * 100, 2)
                     rows.append({
-                        'frame':      frame_idx,
+                        'frame':      actual_frame,
                         'drop_id':    drop_id,
                         'cx':         cx,
                         'cy':         cy,
@@ -242,9 +253,9 @@ def main(video_path: str, output_csv: str,
                         'percentage': pct,
                     })
 
-                if frame_idx % 100 == 0:
+                if sam_idx % 100 == 0:
                     n_drops = len(components)
-                    print(f"  Frame {frame_idx}/{total_frames}  |  {n_drops} drop(s) detected")
+                    print(f"  Frame {actual_frame}/{total_frames}  |  {n_drops} drop(s) detected")
 
     finally:
         shutil.rmtree(frame_dir, ignore_errors=True)
@@ -288,8 +299,10 @@ if __name__ == '__main__':
                         help='Minimum circularity 0-1 for initial detection (default: 0.3)')
     parser.add_argument('--margin',      type=int,   default=3,
                         help='Edge margin px for fully-in-frame check (default: 3)')
+    parser.add_argument('--frame_step', type=int,   default=1,
+                        help='Sample every Nth frame to reduce GPU memory (default: 1)')
     args = parser.parse_args()
 
     main(args.video, args.output, args.checkpoint, args.model_cfg,
          args.bg_frames, args.diff_thresh, args.min_area,
-         args.circ_thresh, args.margin)
+         args.circ_thresh, args.margin, args.frame_step)

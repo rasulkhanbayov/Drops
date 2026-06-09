@@ -1,0 +1,11 @@
+5 ml 2% CA in acetone 
+10 mls of surfactant solution added above and below CMC so conc becomes 1% (acetone removed)
+The samples (4 microlitres) dropped on superhydrophobic coating on glass slide
+
+Sample key
+cainhcg - 1% nanoparticles in cocoglysomate above cmc
+cainlcg - 1% nanoparticles in cocoglysomate below cmc
+cainhsds - 1% nanoparticles in sds above cmc
+cainlsds - 1% nanoparticles in sds below cmc
+cainhtx - 1% nanoparticles in tx-100 above cmc
+cainltx - 1% nanoparticles in tx-100 below cmc

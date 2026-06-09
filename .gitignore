@@ -2,6 +2,12 @@
 02182026/*.mp4
 03242026_particlesonlypreparedinsurfactant/*.mp4
 05052026/*.mp4
+new_experiments/**/*.mp4
+
+# Large model weights (>100 MB, exceeds GitHub limit)
+**/*.safetensors
+**/*.bin
+finetune_data/
 
 # Spreading frame images
 02182026/Spreading/

@@ -34,13 +34,19 @@ from dataclasses import dataclass, asdict, fields
 from typing import Optional
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-PX_PER_MM   = 65.625
+PX_PER_MM      = 65.625
+PX_PER_MM_NEW  = 66.0
+PX_PER_MM_N1   = 66.5   # new_experiments/05112026 (measured from scale.mp4)
+PX_PER_MM_N2   = 56.0   # new_experiments/05122026 (measured from scale2.mp4)
 FPS_ACTUAL  = 2996.766489   # true capture rate at 1280×512 (from CameraSpecs.jpg)
 FPS_ENCODED = 60.0          # video file playback FPS
 
-VIDEOS_02 = Path("/home/ubuntu/materials/02182026")
-VIDEOS_03 = Path("/home/ubuntu/materials/03242026_particlesonlypreparedinsurfactant")
-OUT_DIR   = Path("/home/ubuntu/materials")
+VIDEOS_02   = Path("/home/ubuntu/materials/02182026")
+VIDEOS_03   = Path("/home/ubuntu/materials/03242026_particlesonlypreparedinsurfactant")
+VIDEOS_05   = Path("/home/ubuntu/materials/05052026")
+VIDEOS_NEW1 = Path("/home/ubuntu/materials/new_experiments/05112026")
+VIDEOS_NEW2 = Path("/home/ubuntu/materials/new_experiments/05122026")
+OUT_DIR     = Path("/home/ubuntu/materials")
 
 SURFACE_ROW_02: dict[str, int] = {
     "water.mp4":     433, "water2.mp4":  433, "water3.mp4":  433,
@@ -73,6 +79,54 @@ SURFACE_ROW_03: dict[str, int] = {
     "ONLY CA tx less CMC1.mp4":  465,
     "ONLY CA tx less CMC2.mp4":  503, "ONLY CA tx less CMC3.mp4":   505,
     "ca+TR.mp4":                 479,
+}
+
+SURFACE_ROW_05: dict[str, int] = {
+    "0.028tx.mp4":          462,
+    "0.028tx2.mp4":         470,
+    "0.028tx3.mp4":         454,
+    "0.08cg.mp4":           473,
+    "0.08cg2.mp4":          457,
+    "0.08cg3.mp4":          454,
+    "0.08cg4.mp4":          454,
+    "0.45sds.mp4":          470,
+    "0.45sds2.mp4":         454,
+    "0.45sds3.mp4":         454,
+    "cainhcg 0.08 b.mp4":   456,
+    "cainhcg 0.08 c.mp4":   458,
+    "cainhcg 0.08 d.mp4":   454,
+    "cainhcg 0.08.mp4":     454,
+    "cainhg0.02 .mp4":      462,
+    "cainhg0.02 2.mp4":     458,
+    "cainhg0.08 4th.mp4":   449,
+}
+
+SURFACE_ROW_NEW1: dict[str, int] = {
+    "ca only 2.mp4":  304,
+    "ca only 3.mp4":  302,
+    "nr50water.mp4":  356,
+    "nr50water2.mp4": 356,
+    "nr50water3.mp4": 358,
+    "nr50water4.mp4": 307,
+    "water 2.mp4":    305,
+    "water 3.mp4":    304,
+}
+
+SURFACE_ROW_NEW2: dict[str, int] = {
+    "0.028tx1.mp4":    300,
+    "0.028tx2.mp4":    303,
+    "0.028tx3.mp4":    305,
+    "0.45sds1.mp4":    304,
+    "0.45sds2.mp4":    312,
+    "0.45sds3.mp4":    305,
+    "cain0.028tx1.mp4":302,
+    "cain0.028tx2.mp4":302,
+    "cain0.08cg1.mp4": 325,
+    "cain0.08cg2.mp4": 303,
+    "cain0.08cg3.mp4": 309,
+    "cain0.45sds.mp4": 304,
+    "cain0.45sds2.mp4":305,
+    "cain0.45sds3.mp4":303,
 }
 
 
@@ -223,7 +277,8 @@ def measure_max_spread(path: str, impact: int, liftoff: int, surface_y: int) -> 
 
 
 # ── Per-video extraction ───────────────────────────────────────────────────────
-def process_video(video_path: Path, surface_y: int, folder_label: str) -> VideoFeatures:
+def process_video(video_path: Path, surface_y: int, folder_label: str,
+                  px_per_mm: float = PX_PER_MM) -> VideoFeatures:
     path = str(video_path)
 
     impact  = find_impact_frame(path)
@@ -233,21 +288,16 @@ def process_video(video_path: Path, surface_y: int, folder_label: str) -> VideoF
 
     cx, cy, radius, vel_px_per_enc_frame = measure_pre_impact(path, impact)
 
-    # Convert per-frame velocity to physical mm/s.
-    # The video stores every actual captured frame, so each frame index step
-    # = 1/FPS_ACTUAL seconds of real time.
-    #   velocity (px/s) = vel_px_per_frame × FPS_ACTUAL
-    #   velocity (mm/s) = velocity (px/s) / PX_PER_MM
     vel_mm_s = None
     if vel_px_per_enc_frame is not None:
         vel_px_per_s = vel_px_per_enc_frame * FPS_ACTUAL
-        vel_mm_s = round(abs(vel_px_per_s) / PX_PER_MM, 2)
+        vel_mm_s = round(abs(vel_px_per_s) / px_per_mm, 2)
         vel_px_per_enc_frame = round(vel_px_per_enc_frame, 4)
 
-    diameter_mm = round(2 * radius / PX_PER_MM, 4) if radius is not None else None
+    diameter_mm = round(2 * radius / px_per_mm, 4) if radius is not None else None
 
     max_sw_px = measure_max_spread(path, impact, liftoff, surface_y)
-    max_sw_mm = round(max_sw_px / PX_PER_MM, 4) if max_sw_px is not None else None
+    max_sw_mm = round(max_sw_px / px_per_mm, 4) if max_sw_px is not None else None
 
     beta_max = None
     if max_sw_px is not None and radius is not None and radius > 0:
@@ -274,15 +324,37 @@ def process_video(video_path: Path, surface_y: int, folder_label: str) -> VideoF
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
-def main():
-    all_features: list[VideoFeatures] = []
+def main(only_folder: str = None):
+    import argparse
+    p = argparse.ArgumentParser()
+    p.add_argument("--folder", default=None,
+                   help="Only process this folder key (e.g. 05052026). Appends to existing table.")
+    args = p.parse_args()
+    if args.folder:
+        only_folder = args.folder
 
     folders = [
-        (VIDEOS_02, SURFACE_ROW_02, "02182026"),
-        (VIDEOS_03, SURFACE_ROW_03, "03242026"),
+        (VIDEOS_02,   SURFACE_ROW_02,   "02182026",  PX_PER_MM),
+        (VIDEOS_03,   SURFACE_ROW_03,   "03242026",  PX_PER_MM),
+        (VIDEOS_05,   SURFACE_ROW_05,   "05052026",  PX_PER_MM_NEW),
+        (VIDEOS_NEW1, SURFACE_ROW_NEW1, "05112026",  PX_PER_MM_N1),
+        (VIDEOS_NEW2, SURFACE_ROW_NEW2, "05122026",  PX_PER_MM_N2),
     ]
 
-    for videos_dir, surface_map, folder_label in folders:
+    # Load existing entries if appending
+    existing_json = OUT_DIR / "feature_table.json"
+    if only_folder and existing_json.exists():
+        existing = json.loads(existing_json.read_text())
+        # Remove any existing entries for this folder so we replace them cleanly
+        all_features_dicts = [e for e in existing if e.get("folder") != only_folder]
+    else:
+        all_features_dicts = []
+
+    new_features: list[VideoFeatures] = []
+
+    for videos_dir, surface_map, folder_label, px_mm in folders:
+        if only_folder and folder_label != only_folder:
+            continue
         if not videos_dir.exists():
             print(f"  [skip] {videos_dir} not found")
             continue
@@ -298,8 +370,8 @@ def main():
 
             print(f"  {vf.name:<42}", end="", flush=True)
             try:
-                feat = process_video(vf, surface_y, folder_label)
-                all_features.append(feat)
+                feat = process_video(vf, surface_y, folder_label, px_per_mm=px_mm)
+                new_features.append(feat)
                 print(
                     f"impact={feat.impact_frame:5d}  "
                     f"contact={feat.contact_time_ms:.2f}ms  "
@@ -309,6 +381,9 @@ def main():
             except Exception as e:
                 print(f"  ERROR: {e}")
 
+    all_features_dicts = all_features_dicts + [asdict(f) for f in new_features]
+    all_features = all_features_dicts  # unified list of dicts for output
+
     # ── Write CSV ──────────────────────────────────────────────────────────────
     csv_path = OUT_DIR / "feature_table.csv"
     col_names = [f.name for f in fields(VideoFeatures)]
@@ -316,15 +391,13 @@ def main():
         writer = csv.DictWriter(fh, fieldnames=col_names)
         writer.writeheader()
         for feat in all_features:
-            writer.writerow(asdict(feat))
+            writer.writerow(feat)
 
     # ── Write JSON ─────────────────────────────────────────────────────────────
     json_path = OUT_DIR / "feature_table.json"
-    json_path.write_text(json.dumps(
-        [asdict(f) for f in all_features], indent=2
-    ))
+    json_path.write_text(json.dumps(all_features, indent=2))
 
-    print(f"\nDone.  {len(all_features)} videos processed.")
+    print(f"\nDone.  {len(new_features)} new videos processed ({len(all_features)} total in table).")
     print(f"  CSV  → {csv_path}")
     print(f"  JSON → {json_path}")
 

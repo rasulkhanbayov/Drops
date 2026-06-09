@@ -1,0 +1,55 @@
+{
+  "task14": {
+    "n_total": 1117,
+    "phase_accuracy_pct": 50.0,
+    "null_rate_pct": 2.4,
+    "cx_mae_px": 24.45,
+    "cy_mae_px": 17.06,
+    "radius_mae_px": 7.88,
+    "spread_mae_px": 996.45,
+    "cx_mae_mm": 0.37,
+    "radius_mae_mm": 0.12,
+    "spread_mae_mm": 15.17,
+    "beta_max_vlm_mae": 12.99
+  },
+  "task6": {
+    "n_total": 94,
+    "accuracy_pct": 11.7,
+    "null_rate_pct": 0.0,
+    "per_class_accuracy": {
+      "C": 0.0,
+      "D": 0.0,
+      "B": 0.0,
+      "A": 100.0
+    },
+    "confusion_matrix": {
+      "A": {
+        "A": 11,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "B": {
+        "A": 24,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "C": {
+        "A": 35,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "D": {
+        "A": 24,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      }
+    },
+    "chance_level_pct": 25.0
+  },
+  "model": "local/qwen25vl-finetuned",
+  "n_evaluated": 1211
+}

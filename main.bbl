@@ -1,0 +1,120 @@
+\begin{thebibliography}{21}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Abbot et~al.(2025)]{abbot2025nanoparticles}
+V. Abbot et~al.
+\newblock Nanoparticles do not influence droplet break-up, spreading, or
+  splashing.
+\newblock \emph{Journal of Colloid and Interface Science}, 678:\penalty0 1--12,
+  2025.
+
+\bibitem[{Anthropic}(2024)]{claude35sonnet}
+{Anthropic}.
+\newblock Claude 3.5 model card.
+\newblock \url{https://www.anthropic.com/claude}, 2024.
+
+\bibitem[Bradski(2000)]{opencv}
+G. Bradski.
+\newblock The {OpenCV} library.
+\newblock \emph{Dr. Dobb's Journal of Software Tools}, 2000.
+
+\bibitem[Chen et~al.(2024)]{internvl2024}
+Z. Chen et~al.
+\newblock {InternVL}: Scaling up vision foundation models and aligning for
+  generic visual-linguistic tasks, 2024.
+
+\bibitem[{Google DeepMind}(2025)]{gemini2flash}
+{Google DeepMind}.
+\newblock Gemini 2.0 flash technical report.
+\newblock \url{https://deepmind.google/technologies/gemini/}, 2025.
+
+\bibitem[Hu et~al.(2022)]{lora2022}
+E.J. Hu et~al.
+\newblock {LoRA}: Low-rank adaptation of large language models.
+\newblock In \emph{ICLR}, 2022.
+
+\bibitem[Jereb et~al.(2025)]{jereb2025droplet}
+G. Jereb et~al.
+\newblock Investigation of droplet spreading and rebound dynamics on
+  superhydrophobic surfaces using machine learning.
+\newblock \emph{Biomimetics}, 10\penalty0 (6):\penalty0 357, 2025.
+
+\bibitem[Jumper et~al.(2021)]{jumper2021alphafold}
+J. Jumper et~al.
+\newblock Highly accurate protein structure prediction with {AlphaFold}.
+\newblock \emph{Nature}, 596:\penalty0 583--589, 2021.
+
+\bibitem[Li et~al.(2024)]{sciverse2024}
+X. Li et~al.
+\newblock {SciVerse}: Benchmarking visual reasoning for scientific figures.
+\newblock \emph{arXiv}, 2024.
+
+\bibitem[Lin et~al.(2024)]{videollava2024}
+B. Lin et~al.
+\newblock Video-{LLaVA}: Learning united visual representation by alignment
+  before projection.
+\newblock In \emph{EMNLP}, 2024.
+
+\bibitem[Lu et~al.(2022)]{scienceqa2022}
+P. Lu et~al.
+\newblock Learn to explain: Multimodal reasoning via thought chains for science
+  question answering.
+\newblock In \emph{NeurIPS}, 2022.
+
+\bibitem[Lu et~al.(2024)]{mathvista2024}
+P. Lu et~al.
+\newblock {MathVista}: Evaluating mathematical reasoning of foundation models
+  in visual contexts.
+\newblock \emph{ICLR}, 2024.
+
+\bibitem[Mangrulkar et~al.(2022)]{peft}
+S. Mangrulkar et~al.
+\newblock {PEFT}: State-of-the-art parameter-efficient fine-tuning methods.
+\newblock \url{https://github.com/huggingface/peft}, 2022.
+
+\bibitem[{OpenAI}(2024)]{gpt4o}
+{OpenAI}.
+\newblock {GPT-4o} system card.
+\newblock \url{https://openai.com/index/gpt-4o-system-card/}, 2024.
+
+\bibitem[Ravi et~al.(2024)]{sam2_2024}
+N. Ravi et~al.
+\newblock {SAM 2}: Segment anything in images and videos, 2024.
+
+\bibitem[Richard et~al.(2002)Richard, Clanet, and
+  Qu\'er\'e]{richard2002surface}
+D. Richard, C. Clanet, and D. Qu\'er\'e.
+\newblock Surface phenomena: Contact time of a bouncing drop.
+\newblock \emph{Nature}, 417:\penalty0 811, 2002.
+
+\bibitem[Wang et~al.(2023)]{ai4science2023}
+H. Wang et~al.
+\newblock Scientific discovery in the age of artificial intelligence.
+\newblock \emph{Nature}, 620:\penalty0 47--60, 2023.
+
+\bibitem[Wang et~al.(2025)]{qwen25vl}
+P. Wang et~al.
+\newblock {Qwen2.5-VL} technical report, 2025.
+
+\bibitem[Wang et~al.(2024)]{charxiv2024}
+Z. Wang et~al.
+\newblock {CharXiv}: Charting gaps in realistic chart understanding in
+  multimodal {LLMs}.
+\newblock \emph{NeurIPS}, 2024.
+
+\bibitem[Yarin(2006)]{yarin2006drop}
+A.L. Yarin.
+\newblock Drop impact dynamics: splashing, spreading, receding, bouncing\ldots.
+\newblock \emph{Annual Review of Fluid Mechanics}, 38:\penalty0 159--192, 2006.
+
+\bibitem[Yue et~al.(2024)]{mmmu2024}
+X. Yue et~al.
+\newblock {MMMU}: A massive multi-discipline multimodal understanding and
+  reasoning benchmark for expert {AGI}.
+\newblock \emph{CVPR}, 2024.
+
+\end{thebibliography}

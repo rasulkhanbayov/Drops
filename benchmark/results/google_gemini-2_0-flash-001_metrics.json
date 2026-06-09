@@ -1,0 +1,55 @@
+{
+  "task14": {
+    "n_total": 1117,
+    "phase_accuracy_pct": 57.6,
+    "null_rate_pct": 0.1,
+    "cx_mae_px": 100.96,
+    "cy_mae_px": 52.39,
+    "radius_mae_px": 14.81,
+    "spread_mae_px": 90.87,
+    "cx_mae_mm": 1.54,
+    "radius_mae_mm": 0.23,
+    "spread_mae_mm": 1.38,
+    "beta_max_vlm_mae": null
+  },
+  "task6": {
+    "n_total": 94,
+    "accuracy_pct": 21.3,
+    "null_rate_pct": 0.0,
+    "per_class_accuracy": {
+      "C": 0.0,
+      "D": 75.0,
+      "B": 0.0,
+      "A": 18.2
+    },
+    "confusion_matrix": {
+      "A": {
+        "A": 2,
+        "B": 0,
+        "C": 1,
+        "D": 8
+      },
+      "B": {
+        "A": 4,
+        "B": 0,
+        "C": 1,
+        "D": 19
+      },
+      "C": {
+        "A": 4,
+        "B": 0,
+        "C": 0,
+        "D": 31
+      },
+      "D": {
+        "A": 6,
+        "B": 0,
+        "C": 0,
+        "D": 18
+      }
+    },
+    "chance_level_pct": 25.0
+  },
+  "model": "google/gemini-2.0-flash-001",
+  "n_evaluated": 1211
+}

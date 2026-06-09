@@ -1,0 +1,32 @@
+{
+  "description": "Classical CV Task 6 classifier — LOO cross-validation using physical features extracted by classical CV pipeline",
+  "evaluation": "leave-one-out",
+  "note": "Features from feature_table.json (02182026 + 03242026 only, 53 videos). VLMs evaluated on all 94 Task6 entries across all 5 folders.",
+  "best_result": {
+    "features": ["contact_time_ms", "max_spread_width_mm"],
+    "n_samples": 50,
+    "classifier": "kNN-3 (LOO)",
+    "accuracy_pct": 66.0,
+    "per_class_accuracy": {
+      "pure_water": 100.0,
+      "surfactant_only": 80.0,
+      "CA_with_surfactant": 66.7,
+      "CA_washed": 52.4
+    }
+  },
+  "all_results": {
+    "ct+sw_knn3": {"features": ["contact_time_ms","max_spread_width_mm"], "n": 50, "accuracy_pct": 66.0, "per_class": {"pure_water": 100.0, "surfactant_only": 80.0, "CA_with_surfactant": 66.7, "CA_washed": 52.4}},
+    "ct+sw_centroid": {"features": ["contact_time_ms","max_spread_width_mm"], "n": 50, "accuracy_pct": 54.0, "per_class": {"pure_water": 33.3, "surfactant_only": 0.0, "CA_with_surfactant": 77.8, "CA_washed": 52.4}},
+    "ct+sw+bf_knn3": {"features": ["contact_time_ms","max_spread_width_mm","max_spread_factor"], "n": 38, "accuracy_pct": 36.8},
+    "all5_knn3": {"features": ["contact_time_ms","max_spread_width_mm","max_spread_factor","impact_velocity","D0_mm"], "n": 33, "accuracy_pct": 39.4}
+  },
+  "vlm_comparison": {
+    "gpt_4o": {"accuracy_pct": 10.6, "task6_n": 94, "bias": "always_A"},
+    "gpt_4o_mini": {"accuracy_pct": 11.7, "task6_n": 94, "bias": "always_A"},
+    "claude_sonnet_45": {"accuracy_pct": 18.1, "task6_n": 94, "bias": "mixed_A_D"},
+    "gemini_2_0_flash": {"accuracy_pct": 21.3, "task6_n": 94, "bias": "always_D"},
+    "chance_baseline": 25.0,
+    "classical_cv_knn3": 66.0
+  },
+  "gap_classical_vs_best_vlm_pp": 44.7
+}

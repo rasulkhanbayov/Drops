@@ -3,7 +3,7 @@
 **Project:** CA nanoparticle / surfactant droplet impact on superhydrophobic surfaces  
 **Scripts:** `ellipse_timeseries.py` (v1) · `ellipse_timeseries_v2.py` (v2)  
 **Dataset:** 53 high-speed shadowgraphy videos across three recording sessions  
-**Date:** 2026-05-10
+**Date:** 2026-05-22 (v3 fixes applied)
 
 ---
 
@@ -331,9 +331,110 @@ python3 ellipse_timeseries_v2.py
 
 ---
 
-## 10. Remaining Work
+---
 
-1. **caonly2 D0**: Investigate why HoughCircles finds a smaller artifact; consider template-based D0 or adjusting radius bounds specifically for large droplets.
-2. **U0 for hard videos**: cainhcg3 has chaotic HoughCircles detections (nozzle/droplet alternating); no method currently recovers U0.
-3. **Rebound tracking**: COR only available for 6/53 videos; many rebound detections are unreliable.
-4. **β outliers**: water6 (β=7.6), ONLY CA cg ABOVE CMC2 (β=24) require manual inspection.
+## 10. v3 Fixes — Open Issues Resolved (2026-05-22)
+
+Four open issues from the previous run were investigated and fixed. All changes are in `ellipse_timeseries_v2.py`.
+
+---
+
+### Fix 1 — D0 Template Cross-Check (caonly2 and ONLY CA cg ABOVE CMC2)
+
+**Root cause:** HoughCircles underestimates the droplet radius to the minimum allowed (`R_MIN=45 px`) for some videos, then `cv2.fitEllipse` on the truncated mask gives `D_px` much smaller than the true droplet diameter. This was consistent across 18 frames in caonly2 (true r≈63 px, detected r=44 px → D0=88 px vs correct 127 px = −30.6% error).
+
+**Fix:** Three conditions trigger the template D0 fallback (any of which indicates unreliable HoughCircles output):
+
+```python
+_tmpl_d0_needed = (D0_px is None          # (a) no detection at all
+                   or D0_px < 60           # (b) physically too small
+                   or len(pre_rows) < 3    # (c) too few frames
+                   or 82 < D0_px < 98)     # (d) Hough stuck at minimum radius
+```
+
+Condition (d) is the new addition: HoughCircles with `R_MIN=45 px` returns r=45 for any droplet it can't fit precisely, and `cv2.fitEllipse` on the resulting 45 px mask gives D_px ≈ 88 px regardless of the true droplet size. D_px in range 82–98 px is therefore a reliable indicator that Hough is stuck at its minimum.
+
+When triggered, `template_d0_search` tries 13 candidate radii (50–110 px, step=5) and picks the one with highest `mean_conf × n_matches`. Override is applied only when the template D0 is ≥30% larger than Hough D0 (prevents false positives on legitimately small droplets near 88 px).
+
+**Why it works for caonly2:** True radius ≈63 px → template at r=65 matches the droplet well. Hough D0=88 px → 82 < 88 < 98 triggers the check. Template D0=130 px → 130/88=1.48 > 1.30 → override applied.
+
+**Why it doesn't break correct detections:** A legitimately small droplet with D0≈88 px has true r≈44 px. The closest template candidate is r=50 → D0=100 px. Ratio 100/88=1.14 < 1.30 → no override.
+
+**Result:** `caonly2` D0 corrected from −30.6% to within ±5% of supervisor value. `ONLY CA cg ABOVE CMC2` D0 corrected from 0.807mm (β=24.1) to ~3.35mm (β≈5.8). `D0_source` field added to summary JSON to flag which method was used per video.
+
+---
+
+### Fix 2 — Low-Confidence Template Fallback for U0 (cainhcg3, water5)
+
+**Root cause:** Some videos (cainhcg3, water5) have very low contrast or heavy nozzle interference that prevents all current methods from estimating U0. The standard template (conf_thresh=0.30) and optical flow both fail.
+
+**Fix:** A 4th fallback added to the U0 priority chain — template matching at reduced confidence (conf_thresh=0.20) — inserted between the standard template and optical flow attempts:
+
+```
+Template (conf ≥ 0.30, U0 ≥ 100)
+  → Template low-conf (conf ≥ 0.20, U0 ≥ 100)   ← NEW
+    → Optical Flow (U0 ≥ 100)
+      → HoughCircles filtered (v1 fallback)
+        → None
+```
+
+The U0 ≥ 100 mm/s guard is retained to reject stationary-background matches. Method is reported as `"template_lc"` in the summary JSON.
+
+**Result:** Partially resolved — cainhcg3 remains U0=None (truly insufficient contrast), water5 resolved with `template_lc`.
+
+---
+
+### Fix 3 — D0-Constrained Rebound Tracking (COR improvement)
+
+**Root cause:** The rebound HoughCircles scan used fixed radius bounds (40–110 px), allowing detections of nozzle shadows and surface reflections that are much larger or smaller than the actual rebounding droplet. These spurious detections produced `U_rebound > U0`, failing the COR ≤ 1.0 guard.
+
+**Fix:** `scan_rebound` now accepts the known `D0_px` and constrains the HoughCircles radius to ±40% of the droplet radius:
+
+```python
+if D0_px:
+    r0    = D0_px / 2.0
+    r_min = max(30, int(r0 * 0.60))
+    r_max = min(130, int(r0 * 1.45))
+```
+
+**Result:** COR recovered from 8/53 → 10/53 videos (mean=0.464, std=0.339, range=[0.074, 0.960]). The constrained window rejects most artifact circles without losing real detections (a rebounding droplet retains ~90–100% of its pre-impact diameter).
+
+---
+
+### Fix 4 — β Outlier Detection and Flagging
+
+**Root cause:** Five videos had `β_max > 5` (physically implausible for non-partitioned droplets on superhydrophobic surfaces: typically β_max ≈ 2–4). Most were caused by wrong D0 (very small detected D0 inflates β = D_max/D0).
+
+**Fix:** Post-processing now flags any video where `β_max > 5.0`:
+- `⚠β>5` appended to per-video print output during run
+- `beta_outlier: true` field added to summary JSON
+- Summary line printed at end: `β outliers (>5): [video list]`
+
+These videos still need manual inspection to determine whether the spreading was genuine (very thin lamella, partial bounce) or a measurement artefact.
+
+**Result after D0 fix:** `ONLY CA cg ABOVE CMC2` dropped from β=24.1 → 5.8 (D0 correction, 0.807mm → 3.352mm via template). Still flagged as β>5 since 5.8 exceeds threshold. Final β outlier list (5 videos): `cainhtx3` (β=5.86), `water3` (β=5.32), `water6` (β=7.47), `ONLY CA cg ABOVE CMC2` (β=5.81), `ONLY CA sds less CMC1` (β=6.36) — all flagged in summary JSON for manual review.
+
+---
+
+### Summary of Changes vs Previous v2
+
+| Issue | Before | After |
+|-------|--------|-------|
+| caonly2 D0 | −30.6% ✗ | +2.7% ✓ (template: 1.981mm) |
+| ONLY CA cg ABOVE CMC2 D0 | 0.807mm (β=24.1) ✗ | 3.352mm (β=5.81, still flagged) |
+| water5 U0 | None | 1095.96 mm/s (template_lc) ✓ |
+| cainhcg3 U0 | None | Still None (insufficient contrast) |
+| COR coverage | 8/53 | 10/53 (mean=0.464, range 0.07–0.96) |
+| β outlier ≥5 | silent | 5 flagged in JSON + console |
+| D0 source tracking | none | `D0_source` field in summary JSON |
+| D0 method split | — | hough=43, template=10 |
+
+---
+
+## 11. Remaining Open Issues
+
+| Issue | Video(s) | Status |
+|-------|----------|--------|
+| U0 unrecoverable | cainhcg3 | Truly insufficient contrast — needs manual measurement |
+| β outlier (still >5) | cainhtx3 (β=5.86), water3 (β=5.32), water6 (β=7.47), ONLY CA cg ABOVE CMC2 (β=5.81), ONLY CA sds less CMC1 (β=6.36) | D0 appears correct (or template-overridden); large spreading may be physical or impact-frame mis-detection |
+| COR low coverage (10/53) | Many videos | U_rebound still noisy for most; template-based rebound tracking could improve further |

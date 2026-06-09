@@ -1,0 +1,55 @@
+{
+  "task14": {
+    "n_total": 1117,
+    "phase_accuracy_pct": 46.6,
+    "null_rate_pct": 0.0,
+    "cx_mae_px": 144.23,
+    "cy_mae_px": 77.97,
+    "radius_mae_px": 24.68,
+    "spread_mae_px": 278.43,
+    "cx_mae_mm": 2.2,
+    "radius_mae_mm": 0.38,
+    "spread_mae_mm": 4.24,
+    "beta_max_vlm_mae": 1.36
+  },
+  "task6": {
+    "n_total": 94,
+    "accuracy_pct": 11.7,
+    "null_rate_pct": 0.0,
+    "per_class_accuracy": {
+      "C": 0.0,
+      "D": 0.0,
+      "B": 0.0,
+      "A": 100.0
+    },
+    "confusion_matrix": {
+      "A": {
+        "A": 11,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "B": {
+        "A": 24,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "C": {
+        "A": 35,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      },
+      "D": {
+        "A": 24,
+        "B": 0,
+        "C": 0,
+        "D": 0
+      }
+    },
+    "chance_level_pct": 25.0
+  },
+  "model": "openai/gpt-4o-mini",
+  "n_evaluated": 1211
+}

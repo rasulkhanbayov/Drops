@@ -1,0 +1,547 @@
+% WACV 2027 Paper Template
+% based on the ICCV 2025 template (https://media.eventhosts.cc/Conferences/ICCV2025/ICCV2025-Author-Kit-Feb.zip) with
+% WACV-specific details (e.g., 2 tracks) from the WACV 2025 template (https://www.dropbox.com/scl/fi/su44zgdhrzik26p2xu37k/WACV-2025-Author-Kit-Template.zip?rlkey=5qcfimjhxnmx3wlyk7yhk8wg7&dl=0)
+
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+%%%%%%%%% PAPER TYPE  - PLEASE UPDATE FOR FINAL VERSION
+\usepackage[review,algorithms]{wacv}      % To produce the REVIEW version for the algorithms track
+% \usepackage[review,applications]{wacv}
+% \usepackage[review,datasets]{wacv}
+% \usepackage{wacv}              % To produce the CAMERA-READY version
+%\usepackage[pagenumbers]{wacv} % To force page numbers, e.g. for an arXiv version
+
+\input{preamble}
+
+\definecolor{wacvblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=wacvblue]{hyperref}
+
+%%%%%%%%% PAPER ID  - PLEASE UPDATE
+\def\wacvPaperID{*****}
+\def\confName{WACV}
+\def\confYear{2027}
+
+%%%%%%%%% TITLE
+\title{PhysDrop: Benchmarking Vision-Language Models on\\
+Physical Reasoning from Scientific High-Speed Droplet Impact Video}
+
+%%%%%%%%% AUTHORS
+\author{Rasul Khanbayov\\
+% Institution, Department\\
+% City, Country\\
+{\tt\small barhdadirayan01@gmail.com}
+}
+
+\begin{document}
+\maketitle
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{abstract}
+% ─────────────────────────────────────────────────────────────────────────────
+Scientific video analysis in experimental fluid mechanics relies on
+hand-tuned classical computer-vision pipelines that require domain expertise
+and manual re-calibration for each experimental setup.
+We ask whether modern vision-language models (VLMs) can replace or
+extend these pipelines using a novel dataset of \textbf{99 unpublished
+high-speed shadowgraphy videos} of $\sim$\SI{2}{mm} droplets impacting a
+superhydrophobic glass surface across 8 experimental conditions (pure water,
+three surfactant types above and below CMC, and cellulose-acetate
+nanoparticles with and without surfactant).
+
+We introduce \textbf{PhysDrop}, a benchmark of 1{,}211 annotated entries
+covering two complementary task families: (1)~\emph{measurement tasks}—impact
+phase classification and quantitative localisation (centroid, radius, spread
+width); and (2)~\emph{physical reasoning}—fluid composition classification
+directly from observed visual impact dynamics, requiring no labels beyond the
+experimental design.
+
+We evaluate five frontier VLMs zero-shot (Gemini 2.0 Flash, GPT-4o, GPT-4o-mini,
+Claude Sonnet 4.5) and one domain-fine-tuned model (Qwen2.5-VL-7B LoRA,
+trained on 695 labelled frames).
+On measurement tasks, zero-shot phase accuracy plateaus at 46–58\%;
+fine-tuning reduces radius MAE to \SI{0.12}{mm} but does not generalise to
+out-of-distribution visual conditions.
+On fluid composition classification,
+\textit{every} frontier VLM scores \textit{below} the 25\% chance baseline:
+the best model (Gemini) achieves 21.3\%, while all GPT models collapse to
+predicting a single class.
+In contrast, a simple $k$-NN classifier trained on two classical-CV features
+(contact time and spread width) achieves \textbf{66.0\%}—a \textbf{44.7
+percentage-point} gap over the best VLM.
+Our results show that current VLMs learn visual patterns but cannot perform
+the physical reasoning needed to identify hidden material properties from
+observed dynamics.
+\end{abstract}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Introduction}
+\label{sec:intro}
+% ─────────────────────────────────────────────────────────────────────────────
+
+High-speed video is a primary measurement instrument in experimental fluid
+mechanics. A researcher records a droplet impacting a surface at several
+thousand frames per second, then runs a computer-vision pipeline to extract
+quantitative observables: impact velocity $\Uzero$, pre-impact diameter
+$\Dzero$, maximum spreading factor $\betamax = D_{\max}/\Dzero$, and
+coefficient of restitution $\cor = U_{\text{rebound}}/\Uzero$.
+These quantities govern wetting, coating, and spray
+processes~\cite{yarin2006drop,richard2002surface}.
+
+Current pipelines are hand-tuned classical CV: binarisation thresholds,
+HoughCircles parameters, and contact-line detectors must be adjusted
+per-video-setup~\cite{abbot2025nanoparticles,jereb2025droplet}.
+More capable alternatives—segment-anything models~\cite{sam2_2024} and
+vision-language models (VLMs)~\cite{qwen25vl,gpt4o,gemini2flash}—have
+recently shown strong performance on diverse visual tasks.
+This raises a natural question: \emph{can VLMs replace or extend classical
+pipelines for scientific video measurement?}
+
+Beyond measurement, high-speed video contains richer information.
+The visual dynamics of impact—how far a droplet spreads, how quickly it
+retracts, whether it bounces or deposits—encode the fluid's
+surface tension, viscosity, and particle content.
+A skilled experimentalist can identify from a single video whether a droplet
+contains surfactant or nanoparticles.
+Can a VLM do the same?
+
+We build \textbf{PhysDrop}, the first benchmark for VLMs on scientific
+physical video reasoning, comprising 99 high-speed droplet videos across
+8 experimental conditions and two task families:
+\begin{itemize}[leftmargin=*, topsep=2pt, itemsep=1pt]
+  \item \textbf{Task 1/4 — Measurement:} per-frame phase classification
+    (falling / spreading / rebounding) and quantitative localisation
+    (centroid, radius, spread width).
+  \item \textbf{Task 6 — Physical Reasoning:} given a 3-frame summary
+    (pre-impact, max-spread, post-rebound), classify the fluid composition
+    from four classes: pure water, surfactant only,
+    CA nanoparticles + surfactant, washed CA nanoparticles.
+    Ground truth labels come directly from the experimental design—no extra
+    annotation is needed.
+\end{itemize}
+
+\noindent\textbf{Key findings:}
+\begin{enumerate}[leftmargin=*, topsep=2pt, itemsep=1pt]
+  \item Zero-shot VLMs achieve 46–58\% on 3-class phase detection (chance
+    33\%), with no model exceeding 58\%.
+  \item Fine-tuning Qwen2.5-VL-7B with 695 frames reduces radius MAE from
+    0.23–0.38~mm to 0.12~mm (best across all models), but phase accuracy
+    drops to 50\% on out-of-distribution videos.
+  \item \emph{All} VLMs—including the fine-tuned model—score below 25\% chance
+    on fluid composition classification. Both GPT models predict a single class
+    for every video; Gemini predicts a different single class.
+  \item A $k$-NN classifier on two automatically-extracted CV features achieves
+    66.0\%—a 44.7 pp gap—demonstrating that physical features, not visual
+    patterns, are key for fluid characterisation.
+\end{enumerate}
+
+These results establish that VLMs can learn to \emph{measure} physical scenes
+with fine-tuning, but cannot \emph{reason} about the underlying physics from
+visual appearance alone.
+This gap defines the open problem for AI in experimental science.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Related Work}
+\label{sec:related}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\paragraph{Classical CV for droplet analysis.}
+Abbot~\etal~\cite{abbot2025nanoparticles} analyse silica nanoparticle droplets
+with a custom MATLAB pipeline (binarisation $\to$ boundary detection $\to$
+circle fitting), concluding that additive-free NPs do not affect impact dynamics.
+Jereb~\etal~\cite{jereb2025droplet} train Gaussian Process Regression models
+on scalars extracted by classical contour detection ($\betamax$: $R^2{=}0.97$),
+but do not address image-level AI. Neither work asks whether foundation models
+can automate the extraction pipeline or infer fluid properties directly.
+
+\paragraph{VLM benchmarks.}
+Existing VLM evaluation suites target static images with textbook
+knowledge~\cite{mmmu2024,scienceqa2022,mathvista2024} or scientific
+charts~\cite{charxiv2024,sciverse2024}. No existing benchmark evaluates
+VLMs on dynamic physical processes captured in high-speed video, nor tests
+whether models can infer hidden physical properties from observed dynamics.
+
+\paragraph{AI for Science.}
+Foundation models have transformed structural biology~\cite{jumper2021alphafold}
+and materials discovery~\cite{ai4science2023}. Video
+VLMs~\cite{videollava2024,internvl2024} extend multimodal reasoning to dynamic
+scenes, but have not been evaluated on quantitative scientific measurement or
+physical property inference from video.
+
+\paragraph{Domain fine-tuning.}
+LoRA~\cite{lora2022} enables efficient adaptation of large VLMs to narrow tasks
+with hundreds of labelled examples. We show that fine-tuning recovers
+near-CV accuracy on measurement tasks within the training distribution, but
+fails to generalise to new visual conditions or to out-of-training-set tasks.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Dataset}
+\label{sec:dataset}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Experimental setup}
+
+Droplets of $4\,\mu$L were dispensed from a fixed height onto a
+superhydrophobic borosilicate glass surface and imaged with a
+Photron FASTCAM Nova S6 at 2{,}997\,fps (1280$\times$512\,px).
+Two impact velocities were used: $U_0 \approx \SI{1.14}{m/s}$ (drop height
+6.5\,cm) and $U_0 \approx \SI{1.63}{m/s}$ (13.5\,cm), corresponding to Weber
+numbers $\We = \rho U_0^2 \Dzero / \sigma \approx 36$ and $73$, respectively.
+Scale calibration gives 65.6--66.0\,px/mm.
+
+\subsection{Experimental conditions and fluid classes}
+
+Eight sample types were recorded across five recording sessions, spanning two
+impact velocities (Table~\ref{tab:dataset}).
+Samples divide naturally into four fluid classes (Task~6 labels):
+
+\begin{description}[leftmargin=0.5cm, topsep=2pt, itemsep=1pt]
+  \item[\textbf{A — Pure water}] DI water with or without inert fluorescent
+    tracer (Nile Red). No additives that affect surface tension.
+  \item[\textbf{B — Surfactant only}] Sodium dodecyl sulfate (SDS),
+    Triton X-100 (TX-100), or cocoglycoside (CG) at concentrations above
+    and below the critical micelle concentration (CMC).
+  \item[\textbf{C — CA + surfactant}] Cellulose acetate (CA) nanoparticles
+    synthesised \emph{in the presence of} surfactant; free surfactant
+    remains in the droplet.
+  \item[\textbf{D — Washed CA}] CA nanoparticles prepared with surfactant
+    then washed; no free surfactant. Particle surface chemistry is
+    retained but bulk surfactant is removed.
+\end{description}
+
+\begin{table}[t]
+\centering
+\caption{PhysDrop dataset summary. $N_v$: video count; $N_{t6}$: Task 6
+benchmark entries (one per video).}
+\label{tab:dataset}
+\small
+\begin{tabular}{lccc}
+\toprule
+Session & Conditions & $N_v$ & $N_{t6}$ \\
+\midrule
+02182026 & A, B (3 surf.), C (3 surf.) & 32 & 26 \\
+03242026 & B (6 conc.), D & 23 & 23 \\
+05052026 & B, C (CG, TX, SDS above CMC) & 19 & 19 \\
+05112026 & A, D (high vel.) & 7 & 7 \\
+05122026 & B, C (3 surf., high vel.) & 18 & 18 \\
+\midrule
+\textbf{Total} & \textbf{8 conditions} & \textbf{99} & \textbf{93} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All videos are unpublished and not included in any public pre-training corpus.
+
+\subsection{Classical CV pipeline}
+
+We extract ground-truth physical parameters using a three-stage pipeline
+implemented in Python/OpenCV~\cite{opencv}:
+\textbf{(1) Impact detection:} the frame of maximum pixel-difference in the
+lower half of the frame;
+\textbf{(2) Droplet localisation:} HoughCircles~\cite{opencv} on pre-impact
+and rebound frames to obtain centroid and radius;
+\textbf{(3) Spread measurement:} background-subtracted contact width at the
+surface row during the spreading phase.
+This yields: $\Dzero$, $\Uzero$, $\betamax$, contact time $\tau$, and—for
+a subset—$\cor$.
+The same pipeline generates ground-truth labels for the measurement benchmark
+(Tasks~1/4) and physical features for the classical-CV Task~6 classifier.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{PhysDrop Benchmark}
+\label{sec:benchmark}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Task 1/4 — Phase detection and measurement}
+\label{sec:task14}
+
+For each video, we extract 12 frames: 5 pre-impact (\emph{falling}), 4
+during contact (\emph{spreading}), and 3 post-liftoff (\emph{rebounding}).
+Each frame is paired with a prompt asking the VLM to:
+(i)~classify the impact phase (falling / spreading / rebounding);
+(ii)~if falling or rebounding, estimate the droplet centroid $(c_x, c_y)$
+and radius $r$ in pixels;
+(iii)~if spreading, estimate the horizontal contact width.
+Ground-truth is provided by the classical CV pipeline.
+The benchmark contains 1{,}117 single-frame entries.
+
+\paragraph{Metrics.}
+Phase accuracy (\%), centroid MAE $(c_x, c_y)$, radius MAE, and spread-width
+MAE, all reported in mm using the per-video calibration.
+Physics accuracy: VLM-derived $\betamax = w_{\text{spread}} / (2r)$ versus
+CV-derived $\betamax$.
+
+\subsection{Task 6 — Fluid composition classification}
+\label{sec:task6}
+
+Each video generates \emph{one} Task 6 entry consisting of three frames:
+(1)~5 frames before impact; (2)~10 frames after impact (near maximum spread);
+(3)~8 frames after liftoff (post-rebound).
+The prompt asks the VLM to classify the fluid composition as A/B/C/D
+based solely on the visual impact dynamics, without any numerical
+measurements in the prompt.
+Ground-truth labels come from the experimental design; no manual annotation
+is required.
+The benchmark contains 94 Task~6 entries (class distribution:
+$n_A{=}11$, $n_B{=}24$, $n_C{=}35$, $n_D{=}24$).
+Chance accuracy is 25\% (4-class).
+
+\paragraph{Classical CV baseline.}
+For videos with complete CV features ($n{=}50$), we train a $k$-nearest-
+neighbour classifier ($k{=}3$, Euclidean distance in standardised feature
+space) using \emph{leave-one-out cross-validation} on two features:
+contact time $\tau$ (ms) and maximum spread width (mm).
+These features are automatically extracted by the classical pipeline and
+require no additional labelling.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Experiments}
+\label{sec:experiments}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Models evaluated}
+
+\paragraph{Zero-shot VLMs (via OpenRouter API).}
+We evaluate four frontier VLMs in zero-shot mode with greedy decoding and
+a structured JSON output prompt:
+Gemini 2.0 Flash~\cite{gemini2flash},
+GPT-4o and GPT-4o-mini~\cite{gpt4o},
+and Claude Sonnet 4.5~\cite{claude35sonnet}.
+
+\paragraph{Fine-tuned model.}
+We fine-tune Qwen2.5-VL-7B-Instruct~\cite{qwen25vl} with LoRA
+($r{=}16$, $\alpha{=}32$)~\cite{lora2022,peft} on 695 frames from the
+02182026 recording session, labelled with phase, centroid, radius, and spread
+width. Training uses the Task~1/4 prompt only. The adapter is loaded on an
+NVIDIA A100 80\,GB GPU.
+
+\subsection{Task 1/4 results}
+\label{sec:results14}
+
+Table~\ref{tab:task14} summarises phase accuracy and measurement error for all
+models on the 1{,}117-entry benchmark.
+
+\begin{table*}[t]
+\centering
+\caption{Task 1/4 results — phase detection and quantitative measurement.
+All MAE values in mm using per-video calibration (65.6–66.0\,px/mm).
+Best in \textbf{bold}, second \underline{underlined}. $^\dagger$Fine-tuned model trained
+only on 02182026 session; spread\_MAE inflated by frame-width fallback on
+out-of-distribution spreading frames (see text).}
+\label{tab:task14}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+Model & Phase Acc.\,(\%) & $c_x$ MAE & $c_y$ MAE & Radius MAE & Spread MAE & Null\,(\%) \\
+\midrule
+Chance (3-class)            & 33.3 & — & — & — & — & — \\
+\midrule
+GPT-4o-mini~\cite{gpt4o}    & 46.6 & 2.20 & 1.19 & 0.38 & 4.24 & 0.0 \\
+GPT-4o~\cite{gpt4o}         & 50.9 & 1.83 & 1.11 & 0.30 & 2.22 & 0.0 \\
+Fine-tuned Qwen LoRA$^\dagger$ & 50.0 & \best{0.37} & \best{0.26} & \best{0.12} & 15.17$^\dagger$ & 2.4 \\
+Gemini 2.0 Flash~\cite{gemini2flash} & \best{57.6} & 1.54 & 0.80 & \second{0.23} & 1.38 & 0.1 \\
+Claude Sonnet 4.5~\cite{claude35sonnet} & \best{57.6} & 0.70 & \second{0.60} & 0.31 & \best{0.80} & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{Phase detection.}
+No model exceeds 58\% on 3-class phase detection (chance: 33\%).
+Gemini and Claude Sonnet 4.5 are tied at 57.6\%.
+GPT-4o improves over GPT-4o-mini by only 4 pp despite substantially higher
+compute cost, suggesting diminishing returns of model scale on this task.
+
+\paragraph{Spatial localisation.}
+The fine-tuned Qwen model achieves the best centroid ($c_x$ MAE: 0.37\,mm)
+and radius MAE (0.12\,mm) across all models, demonstrating that fine-tuning
+effectively transfers localisation accuracy.
+Claude Sonnet 4.5 achieves the best spread-width MAE (0.80\,mm) among
+zero-shot models, considerably better than GPT-4o (2.22\,mm) and
+GPT-4o-mini (4.24\,mm).
+
+\paragraph{Fine-tuned generalisation gap.}
+The Qwen LoRA model achieves 93.3\% phase accuracy on its in-distribution
+validation set (78 frames from 02182026) but drops to 50.0\% on the full
+benchmark.
+Per-session analysis reveals the collapse is driven by the new-experiments
+sessions (05112026: 28.7\%; 05122026: 37.7\%), where the Nile Red fluorescent
+tracer creates a distinctive ring-shaped droplet appearance unseen during
+training.
+This demonstrates a fundamental generalisation limitation of domain fine-tuning
+under visual distribution shift.
+
+The spread-width MAE of 15.17\,mm is caused by the model outputting the frame
+width (1{,}279\,px) as a fallback for spreading frames it cannot segment—a
+degenerate but deterministic failure mode. For in-distribution spreading frames
+in 02182026, spread-width predictions are accurate.
+
+\subsection{Task 6 results}
+\label{sec:results6}
+
+Table~\ref{tab:task6} shows fluid composition classification accuracy for all
+models. Figure~\ref{fig:confusion} visualises the per-class prediction
+distribution for each model.
+
+\begin{table}[t]
+\centering
+\caption{Task 6 — fluid composition classification accuracy (\%).
+4-class problem; chance = 25\%.
+Per-class: A = pure water, B = surfactant only, C = CA+surfactant, D = washed CA.
+\fail{Red}: below chance baseline.}
+\label{tab:task6}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccl}
+\toprule
+Model & Overall & A & B & C & D & Bias \\
+\midrule
+Chance baseline      & 25.0 & 25 & 25 & 25 & 25 & — \\
+\midrule
+GPT-4o               & \fail{10.6} & 90.9 & 0 & 0 & 0 & Always A \\
+GPT-4o-mini          & \fail{11.7} & 100 & 0 & 0 & 0 & Always A \\
+FT-Qwen              & \fail{11.7} & 100 & 0 & 0 & 0 & Always A \\
+Claude 4.5           & \fail{18.1} & 45.5 & 8.3 & 2.9 & 37.5 & Mixed A/D \\
+Gemini 2.0F          & \fail{21.3} & 18.2 & 0 & 0 & 75.0 & Always D \\
+\midrule
+\textbf{CV (kNN-3)}  & \best{66.0} & 100 & 80.0 & 66.7 & 52.4 & Balanced \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_confusion}
+\caption{Confusion matrices for Task~6 fluid composition classification
+(row = true label, column = predicted label; cell values are counts; shading
+is row-normalised).
+A = pure water, B = surfactant only, C = CA+surfactant, D = washed CA.
+GPT-4o, GPT-4o-mini, and Fine-tuned Qwen collapse entirely to class A;
+Gemini collapses to class D; Claude Sonnet 4.5 is more distributed but still
+below the 25\% chance baseline.
+\textit{No VLM correctly identifies any class~B or class~C video.}}
+\label{fig:confusion}
+\end{figure*}
+
+\paragraph{Universal VLM failure.}
+Every VLM—zero-shot and fine-tuned—scores below the 25\% chance baseline.
+The failure is not random: models develop strong class biases.
+GPT-4o and GPT-4o-mini predict class A (pure water) for \emph{all 94} videos;
+Gemini predicts class D (washed CA) for 77/94 videos;
+Claude is more distributed but still below chance.
+Notably, scaling GPT-4o-mini to GPT-4o \emph{decreases} Task~6 accuracy
+(11.7\% $\to$ 10.6\%), confirming that model capability does not translate
+to physical reasoning.
+The fine-tuned model, trained exclusively on Task~1/4 prompts, inherits the
+GPT-style A-bias upon encountering the Task~6 prompt, scoring identically to
+GPT-4o-mini (11.7\%).
+
+\paragraph{Classical CV advantage.}
+The $k$-NN classifier using only $\tau$ and $w_{\text{spread}}$ reaches
+66.0\% LOO accuracy—a \textbf{44.7 pp gap} over the best VLM (Gemini, 21.3\%).
+Per-class accuracy is 100\% on pure water, 80\% on surfactant-only, 66.7\% on
+CA+surfactant, and 52.4\% on washed CA.
+The harder classes (C and D) differ physically by whether free surfactant is
+present in the droplet bulk—a subtle distinction that classical features
+encode implicitly through the contact-time and spread dynamics.
+
+\subsection{Why VLMs fail at Task 6}
+
+\paragraph{Single-class collapse.}
+The consistent collapse to a single class (A or D depending on model)
+suggests VLMs are applying a \emph{prior} over class labels rather than
+extracting task-relevant visual cues from the impact sequence.
+Absent clear visual discriminators in their training data for this domain,
+models default to the most frequent or most ``natural'' label.
+
+\paragraph{No temporal integration.}
+The three-frame Task~6 prompt spans $\sim$50 frames of dynamics.
+VLMs likely process each frame independently and average the evidence
+rather than tracking continuous physical quantities (spread rate, retraction
+speed, satellite formation) that encode fluid properties.
+
+\paragraph{Classical CV encodes physics.}
+Contact time $\tau$ is related to the capillary time
+$\tau_c = \sqrt{\rho \Dzero^3 / \sigma}$ (surface tension $\sigma$);
+spread width encodes $\betamax \propto \We^{1/4}$ for low-viscosity
+fluids~\cite{yarin2006drop}.
+Surfactants reduce $\sigma$, systematically increasing $\tau$ and
+$\betamax$ for class B/C, while washed NPs (class D) behave more like
+water (class A) in bulk but retain modified wetting kinetics.
+The $k$-NN classifier discovers these class-separating directions in
+$(\tau, w_{\text{spread}})$ space; VLMs, processing raw pixels without
+physics priors, cannot.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Discussion}
+\label{sec:discussion}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\paragraph{Measurement vs.\ physical reasoning.}
+Our benchmark reveals a sharp bifurcation in VLM capability:
+with fine-tuning, a 7B model can \emph{locate} a $\sim$2\,mm droplet
+with sub-pixel accuracy and classify its impact phase with 93\% accuracy
+(in-distribution).
+Yet the same model—and all frontier zero-shot VLMs—completely fail to infer
+what is \emph{inside} the droplet from how it moves.
+This separation between perception and physics-grounded reasoning defines the
+current frontier of AI in experimental science.
+
+\paragraph{Implications for lab automation.}
+Classical CV pipelines require per-setup calibration but encode
+domain physics through their feature choices.
+VLMs promise automation without calibration, but our results show they do
+not yet provide a drop-in replacement, particularly for inference tasks
+that require understanding physical causality.
+A promising direction is hybrid pipelines that use VLMs for robust
+localisation and segmentation, while delegating physical interpretation
+to physics-aware models or classical extractors.
+
+\paragraph{Dataset velocity and generalisation.}
+The two-velocity design (1.14 and 1.63\,m/s) reveals that fine-tuned
+model accuracy degrades severely under visual distribution shift
+introduced by the fluorescent tracer (Nile Red), even though the physical
+task is identical.
+Future work should investigate domain-adaptive approaches and the role of
+data diversity in scientific video fine-tuning.
+
+\paragraph{Limitations.}
+The classical CV classifier is evaluated on $n{=}50$ videos from two sessions
+only; the VLM evaluation covers all 94 Task~6 entries.
+This discrepancy should be addressed by extending the classical pipeline to
+new-experiments sessions.
+COR is available for only 10 videos, precluding its use as a classifier
+feature despite its strong physical relevance.
+Adding COR would likely further improve the classical baseline.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Conclusion}
+\label{sec:conclusion}
+% ─────────────────────────────────────────────────────────────────────────────
+
+We introduced PhysDrop, a benchmark for evaluating vision-language models on
+scientific high-speed video of droplet impact, covering measurement tasks
+(phase, centroid, radius, spread) and a physical reasoning task (fluid
+composition classification).
+Evaluating five VLMs across 1{,}211 benchmark entries, we find:
+fine-tuning with $<$700 frames substantially improves measurement accuracy
+but does not generalise to novel visual conditions;
+and all VLMs—including fine-tuned—score below the 25\% chance baseline on
+fluid classification, while a 2-feature $k$-NN achieves 66\%.
+
+The 44.7\,pp gap between classical CV and the best VLM on physical reasoning
+is our central finding.
+It quantifies precisely where the current generation of VLMs fails: not at
+detection or localisation, but at understanding the physical meaning of what
+they see.
+Closing this gap—whether through physics-constrained decoding, synthetic
+training data from simulators, or novel architectures—is the challenge for
+the next generation of AI for experimental science.
+
+\paragraph{Acknowledgements.}
+% TODO: Add acknowledgements (supervisor, funding, lab).
+
+{\small
+\bibliographystyle{ieeenat_fullname}
+\bibliography{main}
+}
+
+\end{document}

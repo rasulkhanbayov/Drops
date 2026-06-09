@@ -1,0 +1,55 @@
+{
+  "task14": {
+    "n_total": 1117,
+    "phase_accuracy_pct": 57.6,
+    "null_rate_pct": 0.0,
+    "cx_mae_px": 45.85,
+    "cy_mae_px": 39.16,
+    "radius_mae_px": 20.34,
+    "spread_mae_px": 52.36,
+    "cx_mae_mm": 0.7,
+    "radius_mae_mm": 0.31,
+    "spread_mae_mm": 0.8,
+    "beta_max_vlm_mae": null
+  },
+  "task6": {
+    "n_total": 94,
+    "accuracy_pct": 18.1,
+    "null_rate_pct": 1.1,
+    "per_class_accuracy": {
+      "C": 2.9,
+      "D": 37.5,
+      "B": 8.3,
+      "A": 45.5
+    },
+    "confusion_matrix": {
+      "A": {
+        "A": 5,
+        "B": 1,
+        "C": 1,
+        "D": 4
+      },
+      "B": {
+        "A": 7,
+        "B": 2,
+        "C": 2,
+        "D": 13
+      },
+      "C": {
+        "A": 19,
+        "B": 3,
+        "C": 1,
+        "D": 11
+      },
+      "D": {
+        "A": 11,
+        "B": 1,
+        "C": 3,
+        "D": 9
+      }
+    },
+    "chance_level_pct": 25.0
+  },
+  "model": "anthropic/claude-sonnet-4.5",
+  "n_evaluated": 1211
+}
