@@ -4,16 +4,16 @@ ellipse_timeseries_v2.py
 Improved version of ellipse_timeseries.py.  Three targeted upgrades:
 
   1. TWO-PASS pre-impact scan
-       Pass 1  – HoughCircles (broad radius 45-110 px): robust D0 measurement.
-                 Same as v1; keeps the ±1-3 % accuracy we already have.
-       Pass 2  – Template matching (disk sized to D0): accurate velocity.
+       Pass 1  - HoughCircles (broad radius 45-110 px): robust D0 measurement.
+                 Same as v1; keeps the +/-1-3% accuracy we already have.
+       Pass 2  - Template matching (disk sized to D0): accurate velocity.
                  Template cross-correlation is immune to the nozzle/artifact
                  circles that corrupted v1's HoughCircles-based velocity.
 
   2. IMPACT-FRAME REFINEMENT
-       Scan ±8 frames around the estimated impact_frame to find the first frame
-       where the contact footprint exceeds 1 mm.  Corrects ±5-frame errors in
-       the classical-CV impact detection → improves β_max and U0.
+       Scan +/-8 frames around the estimated impact_frame to find the first frame
+       where the contact footprint exceeds 1 mm.  Corrects +/-5-frame errors in
+       the classical-CV impact detection -> improves beta_max and U0.
 
   3. OPTICAL FLOW FALLBACK
        If template matching collects < 3 positions (very low-contrast videos),
@@ -26,13 +26,14 @@ Outputs to separate paths so v1 is untouched:
 """
 
 import argparse
+import os
 import cv2
 import json
 import csv
 import numpy as np
 from pathlib import Path
 
-# ── Constants ─────────────────────────────────────────────────────────────────
+# -- Constants -----------------------------------------------------------------
 FPS_ACTUAL      = 2996.766489
 PX_PER_MM       = 65.625
 PX_PER_MM_NEW   = 66.0
@@ -54,19 +55,15 @@ OUT_DIR.mkdir(exist_ok=True)
 CLAHE = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
 
 CSV_FIELDS = [
-    "frame", "slice", "phase",
-    "area", "mean", "min", "max",
-    "X", "Y", "major", "minor", "angle",
-    "circ", "feret", "feret_x", "feret_y", "feret_angle", "min_feret",
-    "AR", "roundness", "solidity",
-    "length",
-    "D_px", "D_mm", "beta",
-    "time_ms", "Y_dist_px",
-    "dist_travelled_px", "velocity_px_s", "px_per_mm", "velocity_mm_s",
+    "frame", "phase", "cx_px", "cy_px", "radius_px", "spread_width_px",
+    "detection_method", "confidence",
+    "D_mm", "beta", "velocity_mm_s", "time_ms",
+    "dist_travelled_px", "px_per_mm",
+    "state_change",
 ]
 
 
-# ── Low-level helpers (unchanged from v1) ─────────────────────────────────────
+# -- Low-level helpers (unchanged from v1) -------------------------------------
 
 def read_frame(path, fi):
     cap = cv2.VideoCapture(str(path))
@@ -176,35 +173,11 @@ def fill_velocities(rows, positions, fps, px_per_mm):
         dist_px  = float(np.sqrt(dx ** 2 + dy ** 2))
         vel_mm_s = dist_px * fps / px_per_mm
         rows[i]["dist_travelled_px"] = round(dist_px, 3)
-        rows[i]["velocity_px_s"]     = round(dist_px * fps, 2)
         rows[i]["velocity_mm_s"]     = round(vel_mm_s, 2)
 
 
-def make_row(fi, slice_n, phase, p, surface_y, time_zero_ref, px_per_mm,
-             length=0, beta=None, time_ref_frame=None):
-    ref = time_ref_frame if time_ref_frame is not None else time_zero_ref
-    time_ms = (fi - ref) / FPS_ACTUAL * 1000
-    return {
-        "frame": fi, "slice": slice_n, "phase": phase,
-        "area": p["area"], "mean": p["mean"], "min": p["min"], "max": p["max"],
-        "X": p["cx"], "Y": p["cy"],
-        "major": p["major"], "minor": p["minor"], "angle": p["angle"],
-        "circ": p["circ"], "feret": p["feret"],
-        "feret_x": p["feret_x"], "feret_y": p["feret_y"],
-        "feret_angle": p["angle"], "min_feret": p["min_feret"],
-        "AR": p["AR"], "roundness": p["roundness"], "solidity": p["solidity"],
-        "length": length,
-        "D_px": p["D_px"], "D_mm": round(p["D_px"] / px_per_mm, 4),
-        "beta": beta,
-        "time_ms": round(time_ms, 4),
-        "Y_dist_px": round(surface_y - p["cy"], 1),
-        "dist_travelled_px": None, "velocity_px_s": None,
-        "px_per_mm": px_per_mm, "velocity_mm_s": None,
-    }
-
-
 def filter_falling_run(positions):
-    """Longest consecutive run with cy strictly increasing and frame gap ≤ 3."""
+    """Longest consecutive run with cy strictly increasing and frame gap <= 3."""
     if len(positions) < 2:
         return positions
     best_start, best_len = 0, 1
@@ -247,7 +220,7 @@ def median_pairwise_speed(positions, fps, px_per_mm):
     return spd if spd <= 2500 else None
 
 
-# ── NEW: Template matching helpers ────────────────────────────────────────────
+# -- NEW: Template matching helpers --------------------------------------------
 
 def make_disk_template(radius_px):
     """
@@ -268,17 +241,17 @@ def make_disk_template(radius_px):
 def template_track(video_path, impact_frame, surface_y, radius_px,
                    px_per_mm, lookback=40, conf_thresh=0.30):
     """
-    IMPROVEMENT 1 – Pass-2 velocity tracking via normalized template matching.
+    IMPROVEMENT 1 - Pass-2 velocity tracking via normalized template matching.
 
     For each pre-impact frame (backward scan), slides a droplet-shaped template
     across the search region and records the best-match centre.  Returns a list
     of (frame_idx, cx, cy) positions in chronological order.
 
     Advantages over HoughCircles for velocity:
-      • Searches only where the droplet is expected (above surface, not at top)
-      • Template shape is sized to D0, so nozzle/shadow artifacts (different
+      * Searches only where the droplet is expected (above surface, not at top)
+      * Template shape is sized to D0, so nozzle/shadow artifacts (different
         size / texture) score far below the confidence threshold
-      • Every frame in the scan produces one result; no frame-gap issues
+      * Every frame in the scan produces one result; no frame-gap issues
     """
     template      = make_disk_template(radius_px)
     th, tw        = template.shape
@@ -329,11 +302,11 @@ def template_track(video_path, impact_frame, surface_y, radius_px,
 def template_d0_search(video_path, impact_frame, surface_y, px_per_mm,
                        lookback=40, r_min=50, r_max=110, r_step=5):
     """
-    FIX 1 – Multi-scale template D0 estimation.
+    FIX 1 - Multi-scale template D0 estimation.
 
     Sweeps candidate radii r_min..r_max in r_step increments, runs
     template_track at each, and picks the radius whose matches score
-    highest (mean_confidence × n_matches).  Only called when HoughCircles
+    highest (mean_confidence x n_matches).  Only called when HoughCircles
     D0 is suspicious (< 60 px or < 3 detections), so it costs nothing for
     normal videos.
 
@@ -358,7 +331,7 @@ def template_d0_search(video_path, impact_frame, surface_y, px_per_mm,
 def optical_flow_track(video_path, seed_frame, seed_cx, seed_cy,
                        surface_y, lookback=20):
     """
-    IMPROVEMENT 1 (fallback) – Lucas-Kanade sparse optical flow.
+    IMPROVEMENT 1 (fallback) - Lucas-Kanade sparse optical flow.
 
     Starts from the last reliable HoughCircles detection and tracks the
     droplet centre backward (by running LK forward on reversed frame order).
@@ -382,7 +355,7 @@ def optical_flow_track(video_path, seed_frame, seed_cx, seed_cy,
     if seed_frame not in gray_stack:
         return []
 
-    # Backward tracking: seed → earlier frames
+    # Backward tracking: seed -> earlier frames
     p0 = np.array([[seed_cx, seed_cy]], dtype=np.float32).reshape(-1, 1, 2)
     positions = [(seed_frame, float(seed_cx), float(seed_cy))]
 
@@ -410,16 +383,16 @@ def optical_flow_track(video_path, seed_frame, seed_cx, seed_cy,
     return positions
 
 
-# ── NEW: Impact-frame refinement ──────────────────────────────────────────────
+# -- NEW: Impact-frame refinement ----------------------------------------------
 
 def refine_impact_frame(video_path, impact_frame_est, surface_y,
                          px_per_mm, search_range=8):
     """
-    IMPROVEMENT 2 – Find the true first-contact frame.
+    IMPROVEMENT 2 - Find the true first-contact frame.
 
-    Scans ±search_range frames around the classical-CV estimate.  The first
+    Scans +/-search_range frames around the classical-CV estimate.  The first
     frame where the background-subtracted contact width exceeds 1 mm is
-    declared the true impact frame.  Fixes ±5-frame errors that inflate β
+    declared the true impact frame.  Fixes +/-5-frame errors that inflate beta
     (by including early spreading frames) or deflate it (by missing them).
 
     Falls back to the estimate if no clear contact is found in the window.
@@ -449,14 +422,18 @@ def refine_impact_frame(video_path, impact_frame_est, surface_y,
     return impact_frame_est
 
 
-# ── Phase processors ──────────────────────────────────────────────────────────
+# -- Phase processors ----------------------------------------------------------
 
 def scan_pre_impact_d0(video_path, impact_frame, surface_y, px_per_mm,
                         lookback=40):
     """
-    PASS 1 – HoughCircles backward scan (unchanged from v1).
+    PASS 1 - HoughCircles backward scan (unchanged from v1).
     Reliable D0 measurement; position accuracy is secondary here.
-    Returns (rows, positions, time_zero).
+
+    Returns:
+      rows      - list of (fi, cx, cy, radius_px) tuples
+      positions - list of (fi, cx, cy) tuples
+      time_zero - frame index of first detection
     """
     R_MIN, R_MAX = 45, 110
     detections   = []
@@ -482,7 +459,7 @@ def scan_pre_impact_d0(video_path, impact_frame, surface_y, px_per_mm,
         p = ellipse_params_from_circle(gray, hcx, hcy, hr)
         if p is None:
             continue
-        detections.append((fi, p["cx"], p["cy"], p))
+        detections.append((fi, p["cx"], p["cy"], p, hr))
 
     if not detections:
         return [], [], impact_frame - 20
@@ -491,24 +468,22 @@ def scan_pre_impact_d0(video_path, impact_frame, surface_y, px_per_mm,
     time_zero = detections[0][0]
     rows, positions = [], []
 
-    for slice_n, (fi, cx, cy, p) in enumerate(detections, start=1):
-        row = make_row(fi, slice_n, "falling", p, surface_y,
-                       time_zero_ref=time_zero, px_per_mm=px_per_mm)
-        rows.append(row)
+    for fi, cx, cy, p, hr in detections:
+        radius_px = p["D_px"] / 2.0 if p["D_px"] else float(hr)
+        rows.append((fi, cx, cy, radius_px))
         positions.append((fi, cx, cy))
 
-    fill_velocities(rows, positions, FPS_ACTUAL, px_per_mm)
     return rows, positions, time_zero
 
 
 def compute_u0(video_path, impact_frame, surface_y, D0_px, px_per_mm,
                pre_pos, pre_rows, lookback=40):
     """
-    PASS 2 – Compute U0 via template matching, with optical flow fallback.
+    PASS 2 - Compute U0 via template matching, with optical flow fallback.
 
     Strategy:
       1. Run template matching with a disk sized to D0_px/2.
-      2. If ≥ 3 confident positions, use median pairwise slope → U0.
+      2. If >= 3 confident positions, use median pairwise slope -> U0.
       3. If < 3 template positions, fallback to optical flow from the
          last HoughCircles detection.
       4. If still unreliable (< 3 pts, or speed > 2500 mm/s), return None.
@@ -518,7 +493,7 @@ def compute_u0(video_path, impact_frame, surface_y, D0_px, px_per_mm,
     """
     radius_px = D0_px / 2.0
 
-    # ── Attempt 1: template matching ──────────────────────────────────────
+    # -- Attempt 1: template matching
     tmpl_pos, confs = template_track(
         video_path, impact_frame, surface_y,
         radius_px, px_per_mm, lookback=lookback)
@@ -528,7 +503,7 @@ def compute_u0(video_path, impact_frame, surface_y, D0_px, px_per_mm,
         if u0 is not None and u0 >= 100:
             return u0, "template", tmpl_pos
 
-    # ── Attempt 1b: template at reduced confidence (FIX 2) ────────────────
+    # -- Attempt 1b: template at reduced confidence (FIX 2)
     if len(tmpl_pos) < 3:
         tmpl_pos_lc, _ = template_track(
             video_path, impact_frame, surface_y,
@@ -538,9 +513,8 @@ def compute_u0(video_path, impact_frame, surface_y, D0_px, px_per_mm,
             if u0 is not None and u0 >= 100:
                 return u0, "template_lc", tmpl_pos_lc
 
-    # ── Attempt 2: optical flow from last HoughCircles seed ───────────────
+    # -- Attempt 2: optical flow from last HoughCircles seed
     if pre_pos:
-        # Use the HoughCircles detection closest to impact as the seed
         seed = pre_pos[-1]                   # chronologically last = closest to impact
         seed_fi, seed_cx, seed_cy = seed
         of_pos = optical_flow_track(
@@ -551,14 +525,16 @@ def compute_u0(video_path, impact_frame, surface_y, D0_px, px_per_mm,
             if u0 is not None and u0 >= 100:
                 return u0, "optical_flow", of_pos
 
-    # ── Attempt 3: filtered HoughCircles positions (v1 fallback) ──────────
+    # -- Attempt 3: filtered HoughCircles positions (v1 fallback)
+    # pre_rows: list of (fi, cx, cy, radius_px) tuples
     if D0_px and pre_pos:
-        vel_pos = [
-            pos for pos, row in zip(pre_pos, pre_rows)
-            if pos[2] > 100
-            and row["D_px"]
-            and 0.65 * D0_px <= row["D_px"] <= 1.50 * D0_px
-        ]
+        vel_pos = []
+        for row_tup, pos in zip(pre_rows, pre_pos):
+            fi_r, cx_r, cy_r, r_px = row_tup
+            D_px_r = r_px * 2 if r_px else None
+            if (cy_r > 100 and D_px_r is not None
+                    and 0.65 * D0_px <= D_px_r <= 1.50 * D0_px):
+                vel_pos.append(pos)
         u0 = median_pairwise_speed(vel_pos, FPS_ACTUAL, px_per_mm)
         if u0 is not None:
             return u0, "hough_filtered", vel_pos
@@ -569,11 +545,15 @@ def compute_u0(video_path, impact_frame, surface_y, D0_px, px_per_mm,
 def scan_rebound(video_path, liftoff_frame, surface_y, px_per_mm,
                  D0_px=None, search_frames=30):
     """
-    Rebound phase — FIX 3: D0-constrained radius bounds.
+    Rebound phase - FIX 3: D0-constrained radius bounds.
 
-    Constraining HoughCircles to ±40% of the known droplet radius eliminates
+    Constraining HoughCircles to +/-40% of the known droplet radius eliminates
     most false detections (nozzle shadow, surface reflections) that were
     causing U_rebound > U0 and suppressing COR computation.
+
+    Returns:
+      rows      - list of (fi, cx, cy, radius) tuples
+      positions - list of (fi, cx, cy) tuples
     """
     if D0_px:
         r0    = D0_px / 2.0
@@ -585,7 +565,6 @@ def scan_rebound(video_path, liftoff_frame, surface_y, px_per_mm,
     rows, positions = [], []
     miss, down_count = 0, 0
     prev_cy = None
-    slice_n = 0
 
     for i in range(search_frames):
         fi = liftoff_frame + 1 + i
@@ -616,22 +595,20 @@ def scan_rebound(video_path, liftoff_frame, surface_y, px_per_mm,
             else:
                 down_count = 0
         prev_cy = p["cy"]
-        slice_n += 1
-        row = make_row(fi, slice_n, "rebounding", p, surface_y,
-                       time_zero_ref=liftoff_frame, px_per_mm=px_per_mm,
-                       time_ref_frame=liftoff_frame)
-        rows.append(row)
+        rows.append((fi, p["cx"], p["cy"], float(hr)))
         positions.append((fi, p["cx"], p["cy"]))
         if p["cy"] - p["major"] / 2 <= 5:
             break
 
-    fill_velocities(rows, positions, FPS_ACTUAL, px_per_mm)
     return rows, positions
 
 
 def process_spreading(video_path, impact_frame, liftoff_frame,
                       surface_y, px_per_mm, time_zero):
-    """Background-subtracted contact width — same as v1."""
+    """
+    Background-subtracted contact width - same as v1.
+    Returns list of (fi, width_px, background) tuples.
+    """
     bg_frames = []
     for fi in range(impact_frame - 5, impact_frame):
         f = read_frame(video_path, fi)
@@ -648,27 +625,12 @@ def process_spreading(video_path, impact_frame, liftoff_frame,
         if not ret:
             break
         width_px = contact_width_px(frame, background, surface_y)
-        time_ms  = (fi - time_zero) / FPS_ACTUAL * 1000
-        rows.append({
-            "frame": fi, "slice": fi - impact_frame + 1, "phase": "spreading",
-            "area": None, "mean": None, "min": None, "max": None,
-            "X": None, "Y": surface_y,
-            "major": None, "minor": None, "angle": None,
-            "circ": None, "feret": None,
-            "feret_x": None, "feret_y": None, "feret_angle": None,
-            "min_feret": None,
-            "AR": None, "roundness": 0.0, "solidity": None,
-            "length": width_px,
-            "D_px": None, "D_mm": None, "beta": None,
-            "time_ms": round(time_ms, 4), "Y_dist_px": 0,
-            "dist_travelled_px": None, "velocity_px_s": None,
-            "px_per_mm": px_per_mm, "velocity_mm_s": None,
-        })
+        rows.append((fi, width_px, background))
     cap.release()
     return rows
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# -- Main ----------------------------------------------------------------------
 
 def main(folder_filter=None, out_dir_override=None):
     features = json.loads(FEATURE_JSON.read_text())
@@ -692,6 +654,10 @@ def main(folder_filter=None, out_dir_override=None):
         else SUMMARY_JSON
     )
 
+    # Create state_frames subdirectory
+    state_frames_dir = active_out_dir / "state_frames"
+    state_frames_dir.mkdir(parents=True, exist_ok=True)
+
     summary = []
     print("Processing videos (v2: template matching + impact refinement)...\n")
 
@@ -713,21 +679,16 @@ def main(folder_filter=None, out_dir_override=None):
 
         print(f"  {f['video']}", end="  ", flush=True)
 
-        # ── 1a. Pass 1: HoughCircles → D0 ────────────────────────────────
+        # -- 1a. Pass 1: HoughCircles -> D0
         pre_rows, pre_pos, time_zero = scan_pre_impact_d0(
             video_path, impact_frame, surface_y, px_per_mm)
 
-        D0_vals = [r["D_px"] for r in pre_rows if r["D_px"]]
+        # pre_rows: list of (fi, cx, cy, radius_px) tuples
+        D0_vals = [row_tup[3] * 2 for row_tup in pre_rows if row_tup[3] is not None]
         D0_px   = float(np.median(D0_vals[-5:])) if D0_vals else None
         D0_mm   = round(D0_px / px_per_mm, 4) if D0_px else None
 
-        # ── FIX 1: template D0 cross-check ───────────────────────────────
-        # Four conditions trigger the fallback (unreliable Hough D0):
-        #   (a) D0_px < 60 px — physically too small
-        #   (b) fewer than 3 Hough detections
-        #   (c) D0_px in 82–98 px — Hough stuck at minimum radius R_MIN=45 px
-        #   (d) D0_px > 155 px — Hough latched onto nozzle instead of droplet
-        #       (correct D0_px in dataset ≤ 154 px; nozzle appears at ~208 px)
+        # -- FIX 1: template D0 cross-check
         d0_source   = "hough"
         _hough_too_large = D0_px is not None and D0_px > 155
         _tmpl_d0_needed = (D0_px is None
@@ -739,8 +700,6 @@ def main(folder_filter=None, out_dir_override=None):
             tmpl_d0_px, _, _ = template_d0_search(
                 video_path, impact_frame, surface_y, px_per_mm, lookback=40)
             if tmpl_d0_px is not None:
-                # nozzle case: accept template if it's ≥30% SMALLER than Hough
-                # small-D case: accept template if it's ≥30% LARGER than Hough
                 if D0_px is None:
                     accept = True
                 elif _hough_too_large:
@@ -755,11 +714,11 @@ def main(folder_filter=None, out_dir_override=None):
         if not pre_rows:
             time_zero = max(0, impact_frame - 20)
 
-        # ── 1b. Impact-frame refinement ───────────────────────────────────
+        # -- 1b. Impact-frame refinement
         impact_frame_ref = refine_impact_frame(
             video_path, impact_frame, surface_y, px_per_mm, search_range=4)
 
-        # ── 1c. Pass 2: template matching / optical flow → U0 ─────────────
+        # -- 1c. Pass 2: template matching / optical flow -> U0
         if D0_px:
             U0, u0_method, vel_pos = compute_u0(
                 video_path, impact_frame, surface_y, D0_px, px_per_mm,
@@ -767,86 +726,306 @@ def main(folder_filter=None, out_dir_override=None):
         else:
             U0, u0_method, vel_pos = None, "none", []
 
-        # ── 2. Spreading phase (uses refined impact_frame) ────────────────
-        spread_rows = process_spreading(
+        # -- 2. Spreading phase widths (for beta_max)
+        spread_data = process_spreading(
             video_path, impact_frame_ref, liftoff_frame,
             surface_y, px_per_mm, time_zero)
 
-        widths   = [r["length"] for r in spread_rows if r["length"] and r["length"] > 0]
+        widths   = [sd[1] for sd in spread_data if sd[1] and sd[1] > 0]
         D_max_px = max(widths) if widths else None
         D_max_mm = round(D_max_px / px_per_mm, 4) if D_max_px else None
         beta_max = round(D_max_px / D0_px, 4) if (D_max_px and D0_px) else None
 
-        # ── 3. Rebound phase ──────────────────────────────────────────────
-        reb_rows, reb_pos = scan_rebound(
+        # Build dict of spreading widths by frame index for fast lookup
+        spread_width_by_frame = {sd[0]: sd[1] for sd in spread_data}
+        # Background for spreading contact_width computation
+        spread_background = spread_data[0][2] if spread_data else None
+
+        # -- 3. Rebound detection (for COR)
+        reb_raw, reb_pos = scan_rebound(
             video_path, liftoff_frame, surface_y, px_per_mm, D0_px=D0_px)
 
         U_rebound = median_pairwise_speed(reb_pos, FPS_ACTUAL, px_per_mm)
         COR = round(U_rebound / U0, 4) \
               if (U_rebound and U0 and U0 > 200 and U_rebound <= U0) else None
 
-        # ── 4. Fill beta columns ──────────────────────────────────────────
-        for r in pre_rows:
-            if r["D_px"] and D0_px:
-                r["beta"] = round(r["D_px"] / D0_px, 4)
-        for r in spread_rows:
-            if r["length"] and D0_px:
-                r["beta"] = round(r["length"] / D0_px, 4)
-        for r in reb_rows:
-            if r["D_px"] and D0_px:
-                r["beta"] = round(r["D_px"] / D0_px, 4)
+        # Build dicts for fast per-frame lookup
+        reb_by_frame = {r[0]: r for r in reb_raw}           # {fi: (fi,cx,cy,hr)}
+        pre_by_frame = {row_tup[0]: row_tup for row_tup in pre_rows}  # {fi: (fi,cx,cy,r)}
 
-        # ── 5. Write per-video CSV ────────────────────────────────────────
-        all_rows = pre_rows + spread_rows + reb_rows
-        out_csv  = active_out_dir / f["video"].replace(".mp4", "_timeseries.csv")
-        with open(out_csv, "w", newline="") as fh:
+        # -- 4. Determine first_visible_frame
+        if pre_pos:
+            first_visible_frame = min(p[0] for p in pre_pos)
+        else:
+            first_visible_frame = max(0, impact_frame - 40)
+
+        # -- 5. Determine total frame count
+        cap_info = cv2.VideoCapture(video_path)
+        total_video_frames = int(cap_info.get(cv2.CAP_PROP_FRAME_COUNT))
+        cap_info.release()
+
+        # Cap rebound at 200 frames after liftoff
+        rebound_end_frame   = min(liftoff_frame + 200, total_video_frames - 1)
+        last_frame_to_write = rebound_end_frame
+
+        # -- 6. Prepare template for per-frame detection
+        tmpl_radius  = D0_px / 2.0 if D0_px else 65.0
+        disk_template = make_disk_template(tmpl_radius)
+        th_t, tw_t   = disk_template.shape
+
+        # If no spread background, recompute it
+        if spread_background is None:
+            bg_frames_sp = []
+            for fi_bg in range(impact_frame_ref - 5, impact_frame_ref):
+                frm = read_frame(video_path, fi_bg)
+                if frm is not None:
+                    bg_frames_sp.append(frm.astype(np.float32))
+            spread_background = (
+                np.median(bg_frames_sp, axis=0).astype(np.uint8)
+                if bg_frames_sp else None
+            )
+
+        # -- 7. Main per-frame output loop
+        csv_rows = []
+        prev_phase    = None
+        last_known_cx = None
+        last_known_cy = None
+        last_known_r  = None
+
+        cap = cv2.VideoCapture(video_path)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, first_visible_frame)
+        current_frame_idx = first_visible_frame
+
+        for fi in range(first_visible_frame, last_frame_to_write + 1):
+            # Seek if VideoCapture fell out of sync
+            if fi != current_frame_idx:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, fi)
+            ret, frame = cap.read()
+            current_frame_idx = fi + 1
+
+            # Assign phase
+            if fi < impact_frame_ref:
+                phase = "falling"
+            elif fi < liftoff_frame:
+                phase = "spreading"
+            else:
+                phase = "rebounding"
+
+            # State-change detection
+            state_change = (phase != prev_phase)
+            prev_phase   = phase
+
+            # Save state-change frame as JPEG
+            if state_change and ret and frame is not None:
+                video_stem = Path(f["video"]).stem
+                fname      = f"{video_stem}_frame{fi:05d}_{phase}.jpg"
+                cv2.imwrite(str(state_frames_dir / fname), frame)
+
+            time_ms = (fi - first_visible_frame) / FPS_ACTUAL * 1000
+
+            if not ret or frame is None:
+                csv_rows.append({
+                    "frame": fi, "phase": phase,
+                    "cx_px": None, "cy_px": None, "radius_px": None,
+                    "spread_width_px": None,
+                    "detection_method": "null", "confidence": 0.0,
+                    "D_mm": None, "beta": None,
+                    "velocity_mm_s": None, "time_ms": round(time_ms, 4),
+                    "dist_travelled_px": None, "px_per_mm": px_per_mm,
+                    "state_change": state_change,
+                })
+                continue
+
+            gray = preprocess(frame)
+
+            # -- Spreading phase
+            if phase == "spreading":
+                spread_w = spread_width_by_frame.get(fi, None)
+                if spread_w is None and spread_background is not None:
+                    spread_w = contact_width_px(frame, spread_background, surface_y)
+
+                beta_val = None
+                if spread_w and D0_px:
+                    beta_val = round(spread_w / D0_px, 4)
+
+                csv_rows.append({
+                    "frame": fi, "phase": "spreading",
+                    "cx_px": None, "cy_px": None, "radius_px": None,
+                    "spread_width_px": spread_w,
+                    "detection_method": "contact_width", "confidence": 1.0,
+                    "D_mm": None, "beta": beta_val,
+                    "velocity_mm_s": None, "time_ms": round(time_ms, 4),
+                    "dist_travelled_px": None, "px_per_mm": px_per_mm,
+                    "state_change": state_change,
+                })
+                # Reset last_known across spreading phase
+                last_known_cx = None
+                last_known_cy = None
+                last_known_r  = None
+                continue
+
+            # -- Falling / rebounding: exhaustive detection chain
+            det_cx, det_cy, det_r = None, None, None
+            det_method = "null"
+            det_conf   = 0.0
+
+            # Step 1: Use pre-computed Hough detection if available
+            if phase == "falling" and fi in pre_by_frame:
+                row_tup = pre_by_frame[fi]
+                det_cx, det_cy, det_r = row_tup[1], row_tup[2], row_tup[3]
+                det_method = "hough"
+                det_conf   = 1.0
+            elif phase == "rebounding" and fi in reb_by_frame:
+                rb = reb_by_frame[fi]
+                det_cx, det_cy, det_r = rb[1], rb[2], rb[3]
+                det_method = "hough"
+                det_conf   = 1.0
+
+            # Step 2: Template matching fallback
+            if det_cx is None:
+                y_top = max(0, int(tmpl_radius) - 5)
+                y_bot = int(surface_y - tmpl_radius - 8)
+                if y_bot - y_top >= th_t and gray.shape[1] >= tw_t:
+                    search = gray[y_top: y_bot + th_t, :]
+                    if search.shape[0] >= th_t and search.shape[1] >= tw_t:
+                        result = cv2.matchTemplate(
+                            search, disk_template, cv2.TM_CCOEFF_NORMED)
+                        _, max_val, _, max_loc = cv2.minMaxLoc(result)
+                        if max_val >= 0.30:
+                            t_cx = float(max_loc[0] + tw_t // 2)
+                            t_cy = float(y_top + max_loc[1] + th_t // 2)
+                            if (t_cy + tmpl_radius < surface_y - 5
+                                    and t_cy - tmpl_radius > 5):
+                                det_cx     = t_cx
+                                det_cy     = t_cy
+                                det_r      = tmpl_radius
+                                det_method = "template"
+                                det_conf   = float(max_val)
+
+            # Step 3: Last-known position fallback
+            if det_cx is None and last_known_cx is not None:
+                det_cx     = last_known_cx
+                det_cy     = last_known_cy
+                det_r      = last_known_r
+                det_method = "last_known"
+                det_conf   = 0.3
+
+            # Update last_known
+            if det_cx is not None:
+                last_known_cx = det_cx
+                last_known_cy = det_cy
+                last_known_r  = det_r
+
+            # Compute derived values
+            D_mm_val = None
+            beta_val = None
+            if det_r is not None:
+                D_mm_val = round(det_r * 2 / px_per_mm, 4)
+                if D0_px:
+                    beta_val = round(det_r * 2 / D0_px, 4)
+
+            csv_rows.append({
+                "frame": fi, "phase": phase,
+                "cx_px":  round(det_cx, 1) if det_cx is not None else None,
+                "cy_px":  round(det_cy, 1) if det_cy is not None else None,
+                "radius_px": round(det_r, 1) if det_r is not None else None,
+                "spread_width_px": None,
+                "detection_method": det_method,
+                "confidence": round(det_conf, 4),
+                "D_mm": D_mm_val, "beta": beta_val,
+                "velocity_mm_s": None,      # filled in next pass
+                "time_ms": round(time_ms, 4),
+                "dist_travelled_px": None,  # filled in next pass
+                "px_per_mm": px_per_mm,
+                "state_change": state_change,
+            })
+
+        cap.release()
+
+        # -- 8. Fill velocity and dist_travelled_px
+        prev_cx_v, prev_cy_v, prev_fi_v = None, None, None
+        for row in csv_rows:
+            if row["phase"] == "spreading":
+                # Reset velocity continuity across spreading
+                prev_cx_v, prev_cy_v, prev_fi_v = None, None, None
+                continue
+            cx_v = row["cx_px"]
+            cy_v = row["cy_px"]
+            fi_v = row["frame"]
+            if (cx_v is not None and cy_v is not None
+                    and prev_cx_v is not None and prev_cy_v is not None):
+                fi_gap = fi_v - prev_fi_v
+                if fi_gap > 0:
+                    dx       = cx_v - prev_cx_v
+                    dy       = cy_v - prev_cy_v
+                    dist_px  = float(np.sqrt(dx ** 2 + dy ** 2))
+                    vel_mm_s = dist_px * FPS_ACTUAL / (fi_gap * px_per_mm)
+                    row["dist_travelled_px"] = round(dist_px, 3)
+                    row["velocity_mm_s"]     = round(vel_mm_s, 2)
+            if cx_v is not None and cy_v is not None:
+                prev_cx_v = cx_v
+                prev_cy_v = cy_v
+                prev_fi_v = fi_v
+
+        total_frames_written = len(csv_rows)
+
+        # -- 9. Write per-video CSV
+        out_csv = active_out_dir / f["video"].replace(".mp4", "_timeseries.csv")
+        with open(str(out_csv), "w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=CSV_FIELDS, extrasaction="ignore")
             w.writeheader()
-            w.writerows(all_rows)
+            w.writerows(csv_rows)
 
-        contact_ms = round((liftoff_frame - impact_frame_ref) / FPS_ACTUAL * 1000, 4)
-        impact_shift = impact_frame_ref - impact_frame  # +ve = later, -ve = earlier
+        contact_ms   = round((liftoff_frame - impact_frame_ref) / FPS_ACTUAL * 1000, 4)
+        impact_shift = impact_frame_ref - impact_frame
 
-        beta_flag = " ⚠β>5" if (beta_max and beta_max > 5.0) else ""
+        pre_count    = sum(1 for r in csv_rows if r["phase"] == "falling")
+        spread_count = sum(1 for r in csv_rows if r["phase"] == "spreading")
+        reb_count    = sum(1 for r in csv_rows if r["phase"] == "rebounding")
+
+        beta_flag = " *beta>5*" if (beta_max and beta_max > 5.0) else ""
         print(f"D0={D0_mm}mm({d0_source})  U0={U0}mm/s({u0_method})  "
-              f"β={beta_max}{beta_flag}  U_reb={U_rebound}mm/s  COR={COR}  "
-              f"Δimp={impact_shift:+d}  pre/sp/reb="
-              f"{len(pre_rows)}/{len(spread_rows)}/{len(reb_rows)}")
+              f"beta={beta_max}{beta_flag}  U_reb={U_rebound}mm/s  COR={COR}  "
+              f"Dimp={impact_shift:+d}  pre/sp/reb="
+              f"{pre_count}/{spread_count}/{reb_count}  "
+              f"total={total_frames_written}")
 
         summary.append({
-            "video":               f["video"],
-            "folder":              f["folder"],
-            "px_per_mm":           px_per_mm,
-            "time_zero_frame":     time_zero,
-            "impact_frame_orig":   impact_frame,
-            "impact_frame_ref":    impact_frame_ref,
-            "impact_frame_shift":  impact_shift,
-            "liftoff_frame":       liftoff_frame,
-            "contact_time_ms":     contact_ms,
-            "D0_px":               round(D0_px, 3) if D0_px else None,
-            "D0_mm":               D0_mm,
-            "D_max_px":            D_max_px,
-            "D_max_mm":            D_max_mm,
-            "beta_max":            beta_max,
-            "U0_mm_s":             U0,
-            "U0_method":           u0_method,
-            "U_rebound_mm_s":      U_rebound,
-            "COR":                 COR,
-            "pre_impact_frames":   len(pre_rows),
-            "spreading_frames":    len(spread_rows),
-            "rebound_frames":      len(reb_rows),
-            "D0_source":           d0_source,
-            "beta_outlier":        beta_max is not None and beta_max > 5.0,
+            "video":                f["video"],
+            "folder":               f["folder"],
+            "px_per_mm":            px_per_mm,
+            "time_zero_frame":      time_zero,
+            "impact_frame_orig":    impact_frame,
+            "impact_frame_ref":     impact_frame_ref,
+            "impact_frame_shift":   impact_shift,
+            "liftoff_frame":        liftoff_frame,
+            "contact_time_ms":      contact_ms,
+            "D0_px":                round(D0_px, 3) if D0_px else None,
+            "D0_mm":                D0_mm,
+            "D_max_px":             D_max_px,
+            "D_max_mm":             D_max_mm,
+            "beta_max":             beta_max,
+            "U0_mm_s":              U0,
+            "U0_method":            u0_method,
+            "U_rebound_mm_s":       U_rebound,
+            "COR":                  COR,
+            "pre_impact_frames":    pre_count,
+            "spreading_frames":     spread_count,
+            "rebound_frames":       reb_count,
+            "D0_source":            d0_source,
+            "beta_outlier":         beta_max is not None and beta_max > 5.0,
+            "first_visible_frame":  first_visible_frame,
+            "total_frames_written": total_frames_written,
         })
 
     active_summary_json.write_text(json.dumps(summary, indent=2))
-    print(f"\nCSVs  → {active_out_dir}/")
-    print(f"Summary → {active_summary_json}\n")
+    print(f"\nCSVs  -> {active_out_dir}/")
+    print(f"Summary -> {active_summary_json}\n")
 
-    # ── Final table ───────────────────────────────────────────────────────
+    # -- Final table
     print(f"  {'Video':<38} {'D0':>6} {'U0':>8} {'method':<14} "
-          f"{'β':>6} {'U_reb':>7} {'COR':>6} {'Δimp':>5}")
-    print("  " + "─" * 100)
+          f"{'beta':>6} {'U_reb':>7} {'COR':>6} {'Dimp':>5}")
+    print("  " + "-" * 100)
     for s in summary:
         print(f"  {s['video']:<38} "
               f"{str(s['D0_mm']):>6} "
@@ -857,7 +1036,7 @@ def main(folder_filter=None, out_dir_override=None):
               f"{str(s['COR']):>6} "
               f"{s['impact_frame_shift']:>+5}")
 
-    # ── Method breakdown ──────────────────────────────────────────────────
+    # -- Method breakdown
     from collections import Counter
     methods = Counter(s["U0_method"] for s in summary)
     print(f"\n  U0 method counts: {dict(methods)}")
@@ -865,24 +1044,24 @@ def main(folder_filter=None, out_dir_override=None):
     print(f"  D0 source counts: {dict(d0_srcs)}")
     outliers = [s["video"] for s in summary if s.get("beta_outlier")]
     if outliers:
-        print(f"  β outliers (>5): {outliers}")
+        print(f"  beta outliers (>5): {outliers}")
 
     cors = [s["COR"] for s in summary if s["COR"] and 0 < s["COR"] <= 1]
     if cors:
         print(f"  COR n={len(cors)}  mean={np.mean(cors):.3f}  "
               f"std={np.std(cors):.3f}  range=[{min(cors):.3f},{max(cors):.3f}]")
 
-    # ── Validation vs supervisor ──────────────────────────────────────────
+    # -- Validation vs supervisor
     manual = {
         "cainhsds2.mp4": {"D0": 2.348, "U0": None,   "beta": 1.8009},
         "caonly2.mp4":   {"D0": 1.928, "U0": 964.4,  "beta": 2.1580},
         "cainhtx1.mp4":  {"D0": 1.555, "U0": 1175.8, "beta": 2.0304},
     }
     sm = {s["video"]: s for s in summary}
-    print("\n  ── Validation vs supervisor manual ──")
+    print("\n  -- Validation vs supervisor manual --")
     print(f"  {'Video':<22} {'Param':>6}  {'Manual':>8}  {'Auto':>8}  "
           f"{'Diff%':>8}  {'Method'}")
-    print("  " + "─" * 72)
+    print("  " + "-" * 72)
     for vid, mv in manual.items():
         s = sm.get(vid, {})
         pairs = [
@@ -897,13 +1076,13 @@ def main(folder_filter=None, out_dir_override=None):
                 print(f"  {vid:<22} {param:>6}  {man_v:>8.3f}  {'N/A':>8}  {'---':>8}")
             else:
                 err  = (auto_v - man_v) / man_v * 100
-                flag = "✓" if abs(err) < 10 else ("!" if abs(err) < 25 else "✗")
+                flag = "OK" if abs(err) < 10 else ("!" if abs(err) < 25 else "X")
                 print(f"  {vid:<22} {param:>6}  {man_v:>8.3f}  {auto_v:>8.3f}  "
                       f"{err:>+8.1f}%  {flag}  {meth}")
 
 
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(description="ellipse_timeseries_v2 — droplet impact analysis")
+    p = argparse.ArgumentParser(description="ellipse_timeseries_v2 -- droplet impact analysis")
     p.add_argument("--folder", default=None,
                    help="Only process this dataset folder key (e.g. 02182026, 05052026)")
     p.add_argument("--outdir", default=None,
