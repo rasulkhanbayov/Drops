@@ -464,6 +464,18 @@ def scan_pre_impact_d0(video_path, impact_frame, surface_y, px_per_mm,
     if not detections:
         return [], [], impact_frame - 20
 
+    # Filter outlier cx values using the nearest-to-impact detections as anchor.
+    # Take the median cx of the 5 detections closest to impact_frame (most reliable)
+    # and reject anything more than 200px away — eliminates fixed nozzle/artifact
+    # circles on the far side of the frame without disturbing valid large-droplet cx.
+    detections_sorted_by_fi = sorted(detections, key=lambda d: abs(d[0] - impact_frame))
+    anchor_cxs = [d[1] for d in detections_sorted_by_fi[:5]]
+    anchor_cx = float(np.median(anchor_cxs))
+    detections = [d for d in detections if abs(d[1] - anchor_cx) < 200]
+
+    if not detections:
+        return [], [], impact_frame - 20
+
     detections.sort(key=lambda x: x[0])
     time_zero = detections[0][0]
     rows, positions = [], []
