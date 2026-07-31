@@ -39,12 +39,14 @@ PX_PER_MM       = 65.625
 PX_PER_MM_NEW   = 66.0
 PX_PER_MM_NEW1  = 66.5   # new_experiments/05112026
 PX_PER_MM_NEW2  = 56.0   # new_experiments/05122026
+PX_PER_MM_NEW3  = 56.0   # 05172026 (same camera distance as 05122026)
 
-VIDEOS_02   = Path("/home/ubuntu/materials/02182026")
-VIDEOS_03   = Path("/home/ubuntu/materials/03242026_particlesonlypreparedinsurfactant")
-VIDEOS_05   = Path("/home/ubuntu/materials/05052026")
-VIDEOS_NEW1 = Path("/home/ubuntu/materials/new_experiments/05112026")
-VIDEOS_NEW2 = Path("/home/ubuntu/materials/new_experiments/05122026")
+VIDEOS_02   = Path("/ephemeral/videos/02182026")
+VIDEOS_03   = Path("/ephemeral/videos/03242026_particlesonlypreparedinsurfactant")
+VIDEOS_05   = Path("/ephemeral/videos/05052026")
+VIDEOS_NEW1 = Path("/ephemeral/videos/new_videos/05112026")
+VIDEOS_NEW2 = Path("/ephemeral/videos/new_videos/05122026")
+VIDEOS_NEW3 = Path("/ephemeral/videos/05172026")
 
 FEATURE_JSON = Path("/home/ubuntu/materials/feature_table.json")
 OUT_DIR      = Path("/home/ubuntu/materials/timeseries_v2")
@@ -160,7 +162,13 @@ def ellipse_params_from_circle(gray, cx, cy, radius):
 def contact_width_px(frame, background, surface_y):
     diff  = cv2.absdiff(frame, background)
     gray  = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY) if len(diff.shape) == 3 else diff
-    _, thresh = cv2.threshold(gray, 25, 255, cv2.THRESH_BINARY)
+    band_gray = gray[max(0, surface_y - 40): surface_y + 10, :]
+    # Adaptive threshold: 40% of the band's peak diff, floored at 8 and capped at 25.
+    # Handles low-contrast sessions (05122026 max_diff ~16) without over-triggering
+    # on high-contrast ones (02182026 max_diff ~170).
+    peak = int(band_gray.max())
+    thr  = max(8, min(25, int(peak * 0.4)))
+    _, thresh = cv2.threshold(gray, thr, 255, cv2.THRESH_BINARY)
     band  = thresh[max(0, surface_y - 40): surface_y + 10, :]
     cols  = np.where(band.any(axis=0))[0]
     return int(cols[-1] - cols[0]) if len(cols) > 1 else 0
@@ -622,7 +630,7 @@ def process_spreading(video_path, impact_frame, liftoff_frame,
     Returns list of (fi, width_px, background) tuples.
     """
     bg_frames = []
-    for fi in range(impact_frame - 5, impact_frame):
+    for fi in range(max(0, impact_frame - 30), impact_frame):
         f = read_frame(video_path, fi)
         if f is not None:
             bg_frames.append(f.astype(np.float32))
@@ -657,6 +665,8 @@ def main(folder_filter=None, out_dir_override=None):
         video_dir_map["05112026"] = (VIDEOS_NEW1, PX_PER_MM_NEW1)
     if VIDEOS_NEW2.exists():
         video_dir_map["05122026"] = (VIDEOS_NEW2, PX_PER_MM_NEW2)
+    if VIDEOS_NEW3.exists():
+        video_dir_map["05172026"] = (VIDEOS_NEW3, PX_PER_MM_NEW3)
 
     active_out_dir = Path(out_dir_override) if out_dir_override else OUT_DIR
     active_out_dir.mkdir(parents=True, exist_ok=True)
@@ -753,6 +763,18 @@ def main(folder_filter=None, out_dir_override=None):
         # Background for spreading contact_width computation
         spread_background = spread_data[0][2] if spread_data else None
 
+        # -- 2b. Detect true liftoff from spreading data
+        # True liftoff = first frame after max-spread where contact width
+        # drops below 10% of D0 (droplet detaches from surface)
+        true_liftoff_frame = None
+        if spread_data and D0_px:
+            max_w_fi = max(spread_data, key=lambda sd: sd[1] if sd[1] else 0)[0]
+            liftoff_threshold = D0_px * 0.10
+            for sd in spread_data:
+                if sd[0] > max_w_fi and sd[1] is not None and sd[1] < liftoff_threshold:
+                    true_liftoff_frame = sd[0]
+                    break
+
         # -- 3. Rebound detection (for COR)
         reb_raw, reb_pos = scan_rebound(
             video_path, liftoff_frame, surface_y, px_per_mm, D0_px=D0_px)
@@ -803,6 +825,12 @@ def main(folder_filter=None, out_dir_override=None):
         last_known_cx = None
         last_known_cy = None
         last_known_r  = None
+        video_stem    = Path(f["video"]).stem
+
+        # Track frames we need to save as state images
+        # Keys: "first_visible", "spreading", "rebounding"
+        # "max_spread" is saved after the loop (needs full spread data)
+        _saved_state_frames = set()
 
         cap = cv2.VideoCapture(video_path)
         cap.set(cv2.CAP_PROP_POS_FRAMES, first_visible_frame)
@@ -827,11 +855,23 @@ def main(folder_filter=None, out_dir_override=None):
             state_change = (phase != prev_phase)
             prev_phase   = phase
 
-            # Save state-change frame as JPEG
-            if state_change and ret and frame is not None:
-                video_stem = Path(f["video"]).stem
-                fname      = f"{video_stem}_frame{fi:05d}_{phase}.jpg"
-                cv2.imwrite(str(state_frames_dir / fname), frame)
+            # Save specific state frames
+            if ret and frame is not None:
+                # 1. First visible drop frame (very first frame of the loop)
+                if "first_visible" not in _saved_state_frames and fi == first_visible_frame:
+                    fname = f"{video_stem}_frame{fi:05d}_first_visible.jpg"
+                    cv2.imwrite(str(state_frames_dir / fname), frame)
+                    _saved_state_frames.add("first_visible")
+                # 2. Spreading start: bottom of drop touches surface (impact_frame)
+                if "spreading" not in _saved_state_frames and state_change and phase == "spreading":
+                    fname = f"{video_stem}_frame{fi:05d}_spreading_start.jpg"
+                    cv2.imwrite(str(state_frames_dir / fname), frame)
+                    _saved_state_frames.add("spreading")
+                # 3. True liftoff: save at detected liftoff frame, else skip
+                if "rebounding" not in _saved_state_frames and true_liftoff_frame is not None and fi == true_liftoff_frame:
+                    fname = f"{video_stem}_frame{fi:05d}_liftoff.jpg"
+                    cv2.imwrite(str(state_frames_dir / fname), frame)
+                    _saved_state_frames.add("rebounding")
 
             time_ms = (fi - first_visible_frame) / FPS_ACTUAL * 1000
 
@@ -881,17 +921,35 @@ def main(folder_filter=None, out_dir_override=None):
             det_method = "null"
             det_conf   = 0.0
 
+            # Spatial consistency guard: reject any detection further than this
+            # from the last-known position. Prevents fixed frame artifacts
+            # (nozzle shadow, edge reflection) from being accepted as the droplet.
+            # 12 px per frame is ~3× the max realistic inter-frame displacement at
+            # ~1100 mm/s impact speed (65 px/mm, 3000 fps → ~24 px/frame at impact,
+            # but pre-impact the droplet moves ~8–15 px/frame during fall).
+            _max_jump = 150.0  # px — generous to allow the first detection after gap
+
+            def _spatially_ok(cx, cy):
+                if last_known_cx is None:
+                    return True
+                d = np.sqrt((cx - last_known_cx)**2 + (cy - last_known_cy)**2)
+                return d <= _max_jump
+
             # Step 1: Use pre-computed Hough detection if available
             if phase == "falling" and fi in pre_by_frame:
                 row_tup = pre_by_frame[fi]
-                det_cx, det_cy, det_r = row_tup[1], row_tup[2], row_tup[3]
-                det_method = "hough"
-                det_conf   = 1.0
+                h_cx, h_cy, h_r = row_tup[1], row_tup[2], row_tup[3]
+                if _spatially_ok(h_cx, h_cy):
+                    det_cx, det_cy, det_r = h_cx, h_cy, h_r
+                    det_method = "hough"
+                    det_conf   = 1.0
             elif phase == "rebounding" and fi in reb_by_frame:
                 rb = reb_by_frame[fi]
-                det_cx, det_cy, det_r = rb[1], rb[2], rb[3]
-                det_method = "hough"
-                det_conf   = 1.0
+                h_cx, h_cy, h_r = rb[1], rb[2], rb[3]
+                if _spatially_ok(h_cx, h_cy):
+                    det_cx, det_cy, det_r = h_cx, h_cy, h_r
+                    det_method = "hough"
+                    det_conf   = 1.0
 
             # Step 2: Template matching fallback
             if det_cx is None:
@@ -907,7 +965,8 @@ def main(folder_filter=None, out_dir_override=None):
                             t_cx = float(max_loc[0] + tw_t // 2)
                             t_cy = float(y_top + max_loc[1] + th_t // 2)
                             if (t_cy + tmpl_radius < surface_y - 5
-                                    and t_cy - tmpl_radius > 5):
+                                    and t_cy - tmpl_radius > 5
+                                    and _spatially_ok(t_cx, t_cy)):
                                 det_cx     = t_cx
                                 det_cy     = t_cy
                                 det_r      = tmpl_radius
@@ -953,6 +1012,20 @@ def main(folder_filter=None, out_dir_override=None):
             })
 
         cap.release()
+
+        # -- 7b. Save max-spread frame (requires full spread data)
+        spread_rows = [(r["frame"], r["spread_width_px"])
+                       for r in csv_rows
+                       if r["phase"] == "spreading" and r["spread_width_px"] is not None]
+        if spread_rows:
+            max_spread_fi, max_spread_w = max(spread_rows, key=lambda x: x[1])
+            cap2 = cv2.VideoCapture(video_path)
+            cap2.set(cv2.CAP_PROP_POS_FRAMES, max_spread_fi)
+            ret2, frame2 = cap2.read()
+            cap2.release()
+            if ret2 and frame2 is not None:
+                fname = f"{video_stem}_frame{max_spread_fi:05d}_max_spread.jpg"
+                cv2.imwrite(str(state_frames_dir / fname), frame2)
 
         # -- 8. Fill velocity and dist_travelled_px
         prev_cx_v, prev_cy_v, prev_fi_v = None, None, None
