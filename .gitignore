@@ -27,3 +27,4 @@ __pycache__/
 
 # Logs
 *.log
+github_token.txt
